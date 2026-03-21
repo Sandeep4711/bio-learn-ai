@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | BioLearn AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="/terminal" class="sidebar-brand">
+            <img src="{{ url_for('static', filename='images/biolearn-logo.svg') }}" alt="BioLearn AI" style="width: 28px; height: 28px;">
+            <span>BioLearn AI</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <a href="/terminal" class="sidebar-link">
+                <span>Dashboard</span>
+            </a>
+            <a href="/module" class="sidebar-link">
+                <span>Lessons</span>
+            </a>
+            <a href="/quiz" class="sidebar-link">
+                <span>Quizzes</span>
+            </a>
+            <a href="/learning-path" class="sidebar-link">
+                <span>Learning Path</span>
+            </a>
+            <a href="/weekly-progress" class="sidebar-link">
+                <span>Progress</span>
+            </a>
+            <a href="/analytics" class="sidebar-link">
+                <span>Analytics</span>
+            </a>
+            <a href="/profile" class="sidebar-link">
+                <span>Profile</span>
+            </a>
+            <a href="/settings" class="sidebar-link active">
+                <span>Settings</span>
+            </a>
+            <a href="/help" class="sidebar-link">
+                <span>Help</span>
+            </a>
+        </nav>
+
+        <div style="margin-top: auto; padding-top: var(--space-8); border-top: 1px solid var(--border-primary);">
+            <a href="/logout" class="sidebar-link" style="color: var(--error);">
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-greeting">Settings</h1>
+            <p class="dashboard-subtitle">Manage your account and application preferences</p>
+        </div>
+
+        <!-- Settings Sections -->
+        <div style="display: grid; gap: var(--space-8);">
+
+            <!-- Account Settings -->
+            <div class="card card-elevated" style="padding: var(--space-8);">
+                <h2 style="font-size: var(--text-xl); font-weight: 700; margin-bottom: var(--space-6); color: var(--text-primary);">Account Settings</h2>
+
+                <form id="accountForm" style="display: grid; gap: var(--space-6);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" id="username" class="input" value="{{ current_user.username }}" placeholder="Enter username">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="email" class="input" value="{{ current_user.email or '' }}" placeholder="Enter email address">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Change Password</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                            <input type="password" id="newPassword" class="input" placeholder="New password">
+                            <input type="password" id="confirmPassword" class="input" placeholder="Confirm password">
+                        </div>
+                        <div style="font-size: var(--text-sm); color: var(--text-tertiary); margin-top: var(--space-2);">
+                            Leave blank to keep current password
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Account Changes</button>
+                </form>
+            </div>
+
+            <!-- Learning Preferences -->
+            <div class="card card-elevated" style="padding: var(--space-8);">
+                <h2 style="font-size: var(--text-xl); font-weight: 700; margin-bottom: var(--space-6); color: var(--text-primary);">Learning Preferences</h2>
+
+                <form id="preferencesForm" style="display: grid; gap: var(--space-6);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+                        <div class="form-group">
+                            <label class="form-label">Education Level</label>
+                            <select id="educationLevel" class="input">
+                                <option value="high_school" {% if learner_profile and learner_profile.education_level == 'high_school' %}selected{% endif %}>High School</option>
+                                <option value="undergraduate" {% if learner_profile and learner_profile.education_level == 'undergraduate' %}selected{% endif %}>Undergraduate</option>
+                                <option value="postgraduate" {% if learner_profile and learner_profile.education_level == 'postgraduate' %}selected{% endif %}>Postgraduate</option>
+                                <option value="professional" {% if learner_profile and learner_profile.education_level == 'professional' %}selected{% endif %}>Professional</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Knowledge Level</label>
+                            <select id="knowledgeLevel" class="input">
+                                <option value="beginner" {% if learner_profile and learner_profile.knowledge_level == 'beginner' %}selected{% endif %}>Beginner</option>
+                                <option value="intermediate" {% if learner_profile and learner_profile.knowledge_level == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                                <option value="advanced" {% if learner_profile and learner_profile.knowledge_level == 'advanced' %}selected{% endif %}>Advanced</option>
+                                <option value="expert" {% if learner_profile and learner_profile.knowledge_level == 'expert' %}selected{% endif %}>Expert</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+                        <div class="form-group">
+                            <label class="form-label">Learning Style</label>
+                            <select id="learningStyle" class="input">
+                                <option value="visual" {% if learner_profile and learner_profile.learning_style == 'visual' %}selected{% endif %}>Visual</option>
+                                <option value="reading" {% if learner_profile and learner_profile.learning_style == 'reading' %}selected{% endif %}>Reading/Writing</option>
+                                <option value="interactive" {% if learner_profile and learner_profile.learning_style == 'interactive' %}selected{% endif %}>Interactive</option>
+                                <option value="mixed" {% if learner_profile and learner_profile.learning_style == 'mixed' %}selected{% endif %}>Mixed</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Study Hours per Week</label>
+                            <input type="number" id="studyHours" class="input" min="1" max="40" value="{{ learner_profile.study_hours_per_week if learner_profile else 10 }}" placeholder="10">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Learning Goal</label>
+                        <textarea id="learningGoal" class="input" rows="3" placeholder="Describe your learning objectives...">{{ learner_profile.learning_goal if learner_profile else '' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Learning Preferences</button>
+                </form>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="card card-elevated" style="padding: var(--space-8);">
+                <h2 style="font-size: var(--text-xl); font-weight: 700; margin-bottom: var(--space-6); color: var(--text-primary);">Notification Settings</h2>
+
+                <div style="display: grid; gap: var(--space-4);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); background: var(--bg-surface); border-radius: var(--radius-md);">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--space-1);">Study Reminders</div>
+                            <div style="font-size: var(--text-sm); color: var(--text-secondary);">Get reminded to complete your daily study goals</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="studyReminders" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); background: var(--bg-surface); border-radius: var(--radius-md);">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--space-1);">Quiz Results</div>
+                            <div style="font-size: var(--text-sm); color: var(--text-secondary);">Receive notifications about quiz performance</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="quizResults" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); background: var(--bg-surface); border-radius: var(--radius-md);">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--space-1);">Learning Path Updates</div>
+                            <div style="font-size: var(--text-sm); color: var(--text-secondary);">Get notified about new learning milestones</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="pathUpdates" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); background: var(--bg-surface); border-radius: var(--radius-md);">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--space-1);">Weekly Progress Reports</div>
+                            <div style="font-size: var(--text-sm); color: var(--text-secondary);">Receive weekly summaries of your learning activity</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="weeklyReports" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <button onclick="saveNotificationSettings()" class="btn btn-primary" style="margin-top: var(--space-6);">Save Notification Settings</button>
+            </div>
+
+            <!-- Privacy & Data -->
+            <div class="card card-elevated" style="padding: var(--space-8);">
+                <h2 style="font-size: var(--text-xl); font-weight: 700; margin-bottom: var(--space-6); color: var(--text-primary);">Privacy & Data</h2>
+
+                <div style="display: grid; gap: var(--space-6);">
+                    <div style="padding: var(--space-4); border: 1px solid var(--border-primary); border-radius: var(--radius-md);">
+                        <h3 style="font-weight: 600; margin-bottom: var(--space-2);">Data Export</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: var(--space-4);">Download all your learning data including quiz results, study logs, and learning paths.</p>
+                        <button onclick="exportData()" class="btn btn-secondary">Export My Data</button>
+                    </div>
+
+                    <div style="padding: var(--space-4); border: 1px solid var(--border-primary); border-radius: var(--radius-md);">
+                        <h3 style="font-weight: 600; margin-bottom: var(--space-2);">Clear Learning History</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: var(--space-4);">Remove all quiz results and study logs while keeping your account active.</p>
+                        <button onclick="clearHistory()" class="btn btn-warning">Clear History</button>
+                    </div>
+
+                    <div style="padding: var(--space-4); border: 1px solid var(--error); border-radius: var(--radius-md); background: rgba(239, 68, 68, 0.05);">
+                        <h3 style="font-weight: 600; margin-bottom: var(--space-2); color: var(--error);">Delete Account</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: var(--space-4);">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                        <button onclick="deleteAccount()" class="btn btn-danger">Delete Account</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Preferences -->
+            <div class="card card-elevated" style="padding: var(--space-8);">
+                <h2 style="font-size: var(--text-xl); font-weight: 700; margin-bottom: var(--space-6); color: var(--text-primary);">Application Preferences</h2>
+
+                <div style="display: grid; gap: var(--space-4);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); background: var(--bg-surface); border-radius: var(--radius-md);">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--space-1);">Auto-save Progress</div>
+                            <div style="font-size: var(--text-sm); color: var(--text-secondary);">Automatically save your learning progress</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="autoSave" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); background: var(--bg-surface); border-radius: var(--radius-md);">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--space-1);">Show Lesson History</div>
+                            <div style="font-size: var(--text-sm); color: var(--text-secondary);">Display lesson history sidebar on module page</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="showHistory" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); background: var(--bg-surface); border-radius: var(--radius-md);">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--space-1);">Advanced Analytics</div>
+                            <div style="font-size: var(--text-sm); color: var(--text-secondary);">Show detailed performance metrics and insights</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="advancedAnalytics">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <button onclick="saveAppPreferences()" class="btn btn-primary" style="margin-top: var(--space-6);">Save Application Preferences</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Toggle Switch CSS -->
+    <style>
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-primary);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            top: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+
+    <script>
+        // Account form submission
+        document.getElementById('accountForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword && newPassword !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            const data = { username, email };
+            if (newPassword) {
+                data.password = newPassword;
+            }
+
+            try {
+                const response = await fetch('/api/update-account', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Account settings updated successfully!');
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    alert('Failed to update account settings.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating account settings.');
+            }
+        });
+
+        // Learning preferences form submission
+        document.getElementById('preferencesForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                education_level: document.getElementById('educationLevel').value,
+                knowledge_level: document.getElementById('knowledgeLevel').value,
+                learning_style: document.getElementById('learningStyle').value,
+                study_hours_per_week: parseInt(document.getElementById('studyHours').value),
+                learning_goal: document.getElementById('learningGoal').value
+            };
+
+            try {
+                const response = await fetch('/api/learner-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Learning preferences updated successfully!');
+                } else {
+                    alert('Failed to update learning preferences.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating preferences.');
+            }
+        });
+
+        // Notification settings
+        function saveNotificationSettings() {
+            const settings = {
+                study_reminders: document.getElementById('studyReminders').checked,
+                quiz_results: document.getElementById('quizResults').checked,
+                path_updates: document.getElementById('pathUpdates').checked,
+                weekly_reports: document.getElementById('weeklyReports').checked
+            };
+
+            // Save to localStorage for now (could be sent to server later)
+            localStorage.setItem('notificationSettings', JSON.stringify(settings));
+            alert('Notification settings saved!');
+        }
+
+        // Application preferences
+        function saveAppPreferences() {
+            const settings = {
+                auto_save: document.getElementById('autoSave').checked,
+                show_history: document.getElementById('showHistory').checked,
+                advanced_analytics: document.getElementById('advancedAnalytics').checked
+            };
+
+            localStorage.setItem('appPreferences', JSON.stringify(settings));
+            alert('Application preferences saved!');
+        }
+
+        // Data management functions
+        function exportData() {
+            if (confirm('This will download all your learning data. Continue?')) {
+                window.location.href = '/api/export-data';
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('This will permanently delete all your quiz results and study logs. This action cannot be undone. Continue?')) {
+                fetch('/api/clear-history', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Learning history cleared successfully!');
+                        } else {
+                            alert('Failed to clear history.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while clearing history.');
+                    });
+            }
+        }
+
+        function deleteAccount() {
+            if (confirm('This will permanently delete your account and ALL data. This action cannot be undone. Are you absolutely sure?')) {
+                if (confirm('Last warning: This will delete your account forever. Continue?')) {
+                    fetch('/api/delete-account', { method: 'POST' })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('Account deleted successfully. You will be redirected to the home page.');
+                                window.location.href = '/';
+                            } else {
+                                alert('Failed to delete account.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while deleting account.');
+                        });
+                }
+            }
+        }
+
+        // Load saved preferences on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Load notification settings
+            const notificationSettings = JSON.parse(localStorage.getItem('notificationSettings') || '{}');
+            if (notificationSettings.study_reminders !== undefined) {
+                document.getElementById('studyReminders').checked = notificationSettings.study_reminders;
+            }
+            if (notificationSettings.quiz_results !== undefined) {
+                document.getElementById('quizResults').checked = notificationSettings.quiz_results;
+            }
+            if (notificationSettings.path_updates !== undefined) {
+                document.getElementById('pathUpdates').checked = notificationSettings.path_updates;
+            }
+            if (notificationSettings.weekly_reports !== undefined) {
+                document.getElementById('weeklyReports').checked = notificationSettings.weekly_reports;
+            }
+
+            // Load app preferences
+            const appPreferences = JSON.parse(localStorage.getItem('appPreferences') || '{}');
+            if (appPreferences.auto_save !== undefined) {
+                document.getElementById('autoSave').checked = appPreferences.auto_save;
+            }
+            if (appPreferences.show_history !== undefined) {
+                document.getElementById('showHistory').checked = appPreferences.show_history;
+            }
+            if (appPreferences.advanced_analytics !== undefined) {
+                document.getElementById('advancedAnalytics').checked = appPreferences.advanced_analytics;
+            }
+        });
+    </script>
+</body>
+</html>

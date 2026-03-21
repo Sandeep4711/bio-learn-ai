@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Progress | BioLearn AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=JetBrains+Mono&display=swap');
+        body { background: linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%); font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .daily-card { cursor: pointer; transition: all 0.3s ease; }
+        .daily-card:hover { transform: translateY(-5px); border-color: #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+        .daily-card.active { border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.1); }
+        .stat-box { background: rgba(16, 185, 129, 0.05); border-left: 4px solid #10b981; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <nav class="p-6 border-b border-slate-800/50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black text-emerald-400">📊 WEEKLY PROGRESS</h1>
+            <div class="flex gap-4">
+                <a href="/terminal" class="text-sm text-slate-400 hover:text-emerald-400 transition">Research Terminal</a>
+                <a href="/learning-path" class="text-sm text-slate-400 hover:text-emerald-400 transition">Learning Path</a>
+                <a href="/analytics" class="text-sm text-slate-400 hover:text-emerald-400 transition">Analytics</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-12 max-w-6xl">
+        <div id="loading" class="text-center py-20">
+            <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-emerald-500 font-mono text-xs animate-pulse">Loading Progress Data...</p>
+        </div>
+
+        <div id="content" class="hidden">
+            <!-- Weekly Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="stat-box glass-panel p-6 rounded-lg">
+                    <p class="text-xs text-slate-500 uppercase mb-2">Total Study Time</p>
+                    <p class="text-3xl font-black text-white">
+                        <span id="totalStudyTime">0</span><span class="text-lg text-slate-500"> hrs</span>
+                    </p>
+                </div>
+                <div class="stat-box glass-panel p-6 rounded-lg">
+                    <p class="text-xs text-slate-500 uppercase mb-2">Daily Average</p>
+                    <p class="text-3xl font-black text-emerald-400">
+                        <span id="avgDaily">0</span><span class="text-lg text-slate-500"> min</span>
+                    </p>
+                </div>
+                <div class="stat-box glass-panel p-6 rounded-lg">
+                    <p class="text-xs text-slate-500 uppercase mb-2">Consistency</p>
+                    <div class="flex items-center gap-2">
+                        <p class="text-3xl font-black text-white"><span id="consistency">0</span>%</p>
+                        <div class="w-12 h-12 rounded-full" id="consistencyBar"></div>
+                    </div>
+                </div>
+                <div class="stat-box glass-panel p-6 rounded-lg">
+                    <p class="text-xs text-slate-500 uppercase mb-2">Most Studied</p>
+                    <p class="text-lg font-black text-white" id="mostStudied">-</p>
+                </div>
+            </div>
+
+            <!-- Study Trend Chart -->
+            <div class="glass-panel p-8 rounded-lg mb-8">
+                <h2 class="text-xl font-black text-white mb-6">📈 Study Time Trend</h2>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+                <div class="mt-4 flex gap-4 text-sm">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-emerald-500 rounded"></div>
+                        <span class="text-slate-400">Actual Study Time</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 border-2 border-blue-400 rounded"></div>
+                        <span class="text-slate-400">Target Time</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Cards Grid -->
+            <div class="mb-8">
+                <h2 class="text-xl font-black text-white mb-6">📅 Daily Progress Cards</h2>
+                <div id="dailyCardsContainer" class="grid grid-cols-1 md:grid-cols-7 gap-4">
+                    <!-- Daily cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Detail Panel -->
+            <div id="detailPanel" class="glass-panel p-8 rounded-lg mb-8 hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-black text-white" id="detailDate">Monday</h2>
+                    <button onclick="closeDetailPanel()" class="text-slate-500 hover:text-white text-2xl">✕</button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-slate-900/50 p-6 rounded-lg">
+                        <p class="text-xs text-slate-500 uppercase mb-2">Study Time</p>
+                        <p class="text-3xl font-black text-emerald-400" id="detailStudyTime">0</p>
+                        <p class="text-xs text-slate-600 mt-2" id="detailStatus"></p>
+                    </div>
+                    <div class="bg-slate-900/50 p-6 rounded-lg">
+                        <p class="text-xs text-slate-500 uppercase mb-2">Quiz Performance</p>
+                        <p class="text-3xl font-black text-white" id="detailQuizScore">-</p>
+                        <p class="text-xs text-slate-600 mt-2">Focus Level: <span id="detailFocus"></span></p>
+                    </div>
+                    <div class="bg-slate-900/50 p-6 rounded-lg">
+                        <p class="text-xs text-slate-500 uppercase mb-2">Activities</p>
+                        <div id="detailActivities" class="space-y-1 text-sm text-slate-300"></div>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <p class="text-sm text-slate-500 uppercase mb-3">Topics Covered</p>
+                    <div id="detailTopics" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <div class="mt-6 p-4 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                    <p class="text-sm text-slate-500 uppercase mb-2">AI Feedback</p>
+                    <p class="text-slate-300" id="detailFeedback"></p>
+                </div>
+            </div>
+
+            <!-- Smart Insights -->
+            <div class="glass-panel p-8 rounded-lg">
+                <h2 class="text-xl font-black text-white mb-6">💡 Smart Insights</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-900/50 p-4 rounded-lg">
+                        <p class="text-sm text-slate-500 uppercase mb-2">🌟 Best Performing Day</p>
+                        <p class="text-lg font-black text-white" id="bestDay">-</p>
+                    </div>
+                    <div class="bg-slate-900/50 p-4 rounded-lg">
+                        <p class="text-sm text-slate-500 uppercase mb-2">🎯 Highest Focus Day</p>
+                        <p class="text-lg font-black text-white" id="highestFocus">-</p>
+                    </div>
+                    <div class="bg-blue-500/10 p-4 rounded-lg border border-blue-500/20 md:col-span-2">
+                        <p class="text-sm text-slate-500 uppercase mb-2">📋 Improvement Suggestion</p>
+                        <p class="text-white" id="improvementSuggestion">-</p>
+                    </div>
+                    <div id="burnoutWarning" class="bg-red-500/10 p-4 rounded-lg border border-red-500/20 md:col-span-2 hidden">
+                        <p class="text-sm text-slate-500 uppercase mb-2">⚠️ Burnout Warning</p>
+                        <p class="text-red-300" id="burnoutText"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let allData = {};
+        let trendChart = null;
+
+        async function loadProgressData() {
+            try {
+                const response = await fetch('/api/weekly-progress');
+                const data = await response.json();
+                allData = data;
+
+                // Update summary
+                document.getElementById('totalStudyTime').textContent = (data.summary.total_study_time / 60).toFixed(1);
+                document.getElementById('avgDaily').textContent = Math.round(data.summary.average_daily_study);
+                document.getElementById('consistency').textContent = Math.round(data.summary.consistency_score);
+                document.getElementById('mostStudied').textContent = data.summary.most_studied_topic;
+
+                // Update consistency bar
+                updateConsistencyBar(data.summary.consistency_score);
+
+                // Populate daily cards
+                populateDailyCards(data.daily_cards);
+
+                // Create trend chart
+                createTrendChart(data.graph_data);
+
+                // Update insights
+                document.getElementById('bestDay').textContent = data.insights.best_performing_day;
+                document.getElementById('highestFocus').textContent = data.insights.highest_focus_day;
+                document.getElementById('improvementSuggestion').textContent = data.insights.improvement_suggestion;
+
+                if (data.insights.burnout_warning) {
+                    document.getElementById('burnoutWarning').classList.remove('hidden');
+                    document.getElementById('burnoutText').textContent = data.insights.burnout_warning;
+                }
+
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('content').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading progress data:', error);
+                document.getElementById('loading').innerHTML = '<p class="text-red-400">Error loading progress data</p>';
+            }
+        }
+
+        function updateConsistencyBar(score) {
+            const colors = score >= 80 ? 'bg-green-500' : score >= 60 ? 'bg-yellow-500' : 'bg-red-500';
+            const bar = document.getElementById('consistencyBar');
+            bar.className = `${colors} rounded-full relative overflow-hidden h-full w-full flex items-center justify-center`;
+            bar.innerHTML = `<span class="text-white text-xs font-bold">${Math.round(score)}%</span>`;
+        }
+
+        function populateDailyCards(dailyCards) {
+            const container = document.getElementById('dailyCardsContainer');
+            container.innerHTML = '';
+
+            dailyCards.forEach((card, index) => {
+                const statusColor = card.status.includes('Above') ? 'border-green-500 bg-green-500/5' :
+                                  card.status.includes('Track') ? 'border-blue-500 bg-blue-500/5' :
+                                  'border-red-500 bg-red-500/5';
+
+                const cardEl = document.createElement('div');
+                cardEl.className = `daily-card glass-panel p-4 rounded-lg border-l-4 ${statusColor}`;
+                cardEl.innerHTML = `
+                    <p class="text-xs text-slate-500 uppercase font-bold mb-2">${card.day_name}</p>
+                    <p class="text-2xl font-black text-white">${card.study_time}</p>
+                    <p class="text-xs text-slate-600">mins</p>
+                    <p class="text-xs text-emerald-400 mt-2">${card.status}</p>
+                `;
+                
+                cardEl.addEventListener('click', () => showDetailPanel(card, index));
+                container.appendChild(cardEl);
+            });
+        }
+
+        function showDetailPanel(card, index) {
+            document.getElementById('detailDate').textContent = card.date + ' - ' + card.day_name;
+            document.getElementById('detailStudyTime').textContent = card.study_time + ' min';
+            document.getElementById('detailStatus').textContent = card.status + (card.start_time ? ` | ${card.start_time} - ${card.end_time}` : '');
+            document.getElementById('detailQuizScore').textContent = card.quiz_score ? `${card.quiz_score.toFixed(1)}%` : 'No Quiz';
+            document.getElementById('detailFocus').textContent = card.focus_level.charAt(0).toUpperCase() + card.focus_level.slice(1);
+            
+            // Activities
+            const activitiesEl = document.getElementById('detailActivities');
+            activitiesEl.innerHTML = card.activities.length > 0 
+                ? card.activities.map(a => `<div>• ${a.replace('_', ' ').toUpperCase()}</div>`).join('')
+                : '<div class="text-slate-600">No activities logged</div>';
+            
+            // Topics
+            const topicsEl = document.getElementById('detailTopics');
+            topicsEl.innerHTML = card.topics.length > 0
+                ? card.topics.map(t => `<span class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full">${t}</span>`).join('')
+                : '<span class="text-slate-600 text-sm">No topics logged</span>';
+            
+            document.getElementById('detailFeedback').textContent = card.feedback;
+            
+            document.getElementById('detailPanel').classList.remove('hidden');
+        }
+
+        function closeDetailPanel() {
+            document.getElementById('detailPanel').classList.add('hidden');
+        }
+
+        function createTrendChart(graphData) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: graphData.days,
+                    datasets: [
+                        {
+                            label: 'Actual Study Time',
+                            data: graphData.actual,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#10b981',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Target Study Time',
+                            data: graphData.target,
+                            borderColor: '#3b82f6',
+                            borderDash: [5, 5],
+                            fill: false,
+                            borderWidth: 2,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Minutes'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            },
+                            grid: {
+                                color: 'rgba(16, 185, 129, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#94a3b8'
+                            },
+                            grid: {
+                                color: 'rgba(16, 185, 129, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        loadProgressData();
+    </script>
+</body>
+</html>

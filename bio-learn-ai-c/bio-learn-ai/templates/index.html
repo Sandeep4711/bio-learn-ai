@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | BioLearn AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .continue-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .continue-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .topic-card {
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: var(--space-4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="/terminal" class="sidebar-brand">
+            <img src="{{ url_for('static', filename='images/biolearn-logo.svg') }}" alt="BioLearn AI" style="width: 28px; height: 28px;">
+            <span>BioLearn AI</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <a href="/terminal" class="sidebar-link active">
+                <span>Dashboard</span>
+            </a>
+            <a href="/module" class="sidebar-link">
+                <span>Lessons</span>
+            </a>
+            <a href="/quiz" class="sidebar-link">
+                <span>Quizzes</span>
+            </a>
+            <a href="/learning-path" class="sidebar-link">
+                <span>Learning Path</span>
+            </a>
+            <a href="/weekly-progress" class="sidebar-link">
+                <span>Progress</span>
+            </a>
+            <a href="/analytics" class="sidebar-link">
+                <span>Analytics</span>
+            </a>
+            <a href="/profile" class="sidebar-link">
+                <span>Profile</span>
+            </a>
+        </nav>
+
+        <div style="margin-top: auto; padding-top: var(--space-8); border-top: 1px solid var(--border-primary);">
+            <a href="/logout" class="sidebar-link" style="color: var(--error);">
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-greeting">Welcome back, <span id="username">{{ current_user.username }}</span>!</h1>
+                <p class="dashboard-subtitle">Here's your learning progress today</p>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be loaded here via JavaScript -->
+            <div class="stat-card skeleton" style="height: 140px;"></div>
+            <div class="stat-card skeleton" style="height: 140px;"></div>
+            <div class="stat-card skeleton" style="height: 140px;"></div>
+            <div class="stat-card skeleton" style="height: 140px;"></div>
+        </div>
+
+        <!-- Continue Learning Section -->
+        <div style="margin-bottom: var(--space-8);">
+            <h2 style="font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-6);">Continue Learning</h2>
+            <div class="continue-card card" style="padding: var(--space-8);">
+                <div style="position: relative; z-index: 1;">
+                    <h3 style="font-size: var(--text-3xl); font-weight: 700; margin-bottom: var(--space-3);">Ready for Your Next Module?</h3>
+                    <p style="font-size: var(--text-base); opacity: 0.9; margin-bottom: var(--space-6);">Generate a new learning module on any biotechnology topic</p>
+                    <a href="/module" class="btn btn-lg" style="background: white; color: var(--primary);">
+                        Start Learning
+                        <span>→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-8); margin-bottom: var(--space-8);">
+            <!-- Recent Activity -->
+            <div>
+                <h2 style="font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-6);">Recent Topics</h2>
+                <div id="recentTopics" style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <!-- Topics will be loaded here -->
+                    <div class="card skeleton" style="height: 80px;"></div>
+                    <div class="card skeleton" style="height: 80px;"></div>
+                    <div class="card skeleton" style="height: 80px;"></div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div>
+                <h2 style="font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-6);">Quick Actions</h2>
+                <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <a href="/module" class="card card-clickable">
+                        <div style="font-size: 32px; margin-bottom: var(--space-2); font-weight: bold;">L</div>
+                        <h4 style="margin-bottom: var(--space-1);">New Lesson</h4>
+                        <p class="text-small" style="color: var(--text-secondary);">Generate AI module</p>
+                    </a>
+                    <a href="/quiz" class="card card-clickable">
+                        <div style="font-size: 32px; margin-bottom: var(--space-2); font-weight: bold;">Q</div>
+                        <h4 style="margin-bottom: var(--space-1);">Take Quiz</h4>
+                        <p class="text-small" style="color: var(--text-secondary);">Test your knowledge</p>
+                    </a>
+                    <a href="/learning-path" class="card card-clickable">
+                        <div style="font-size: 32px; margin-bottom: var(--space-2); font-weight: bold;">P</div>
+                        <h4 style="margin-bottom: var(--space-1);">Learning Path</h4>
+                        <p class="text-small" style="color: var(--text-secondary);">View your roadmap</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <div>
+            <h2 style="font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-6);">Performance Overview</h2>
+            <div class="card" style="padding: var(--space-6);">
+                <canvas id="performanceChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch dashboard stats
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/dashboard-stats');
+                const data = await response.json();
+
+                // Update stats grid
+                const statsHTML = `
+                    <div class="stat-card fade-in">
+                        <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">
+                            Q
+                        </div>
+                        <div class="stat-label">Total Quizzes</div>
+                        <div class="stat-value">${data.total_quizzes}</div>
+                        <div class="stat-change positive">+${Math.round(data.total_quizzes * 0.12)} this week</div>
+                    </div>
+
+                    <div class="stat-card fade-in" style="animation-delay: 0.1s;">
+                        <div class="stat-icon" style="background: rgba(34, 211, 238, 0.1); color: var(--accent);">
+                            %
+                        </div>
+                        <div class="stat-label">Average Score</div>
+                        <div class="stat-value">${data.avg_score}%</div>
+                        <div class="stat-change ${data.avg_score >= 70 ? 'positive' : 'negative'}">
+                            ${data.avg_score >= 70 ? '+' : ''}${(data.avg_score - 65).toFixed(1)}% vs last month
+                        </div>
+                    </div>
+
+                    <div class="stat-card fade-in" style="animation-delay: 0.2s;">
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+                            ↗
+                        </div>
+                        <div class="stat-label">Current Streak</div>
+                        <div class="stat-value">${data.current_streak} days</div>
+                        <div class="stat-change positive">Keep it going!</div>
+                    </div>
+
+                    <div class="stat-card fade-in" style="animation-delay: 0.3s;">
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
+                            T
+                        </div>
+                        <div class="stat-label">Study Time (Week)</div>
+                        <div class="stat-value">${Math.floor(data.weekly_study_minutes / 60)}h ${data.weekly_study_minutes % 60}m</div>
+                        <div class="stat-change positive">Great progress!</div>
+                    </div>
+                `;
+                document.getElementById('statsGrid').innerHTML = statsHTML;
+
+                // Update recent topics
+                if (data.recent_topics && data.recent_topics.length > 0) {
+                    const topicsHTML = data.recent_topics.map(topic => `
+                        <div class="card card-clickable fade-in" onclick="window.location.href='/module'">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="margin-bottom: var(--space-1);">${topic.topic}</h4>
+                                    <p class="text-small" style="color: var(--text-secondary);">${topic.date}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: var(--text-2xl); font-weight: 700; color: ${topic.score / topic.total >= 0.7 ? 'var(--success)' : 'var(--warning)'};">
+                                        ${Math.round((topic.score / topic.total) * 100)}%
+                                    </div>
+                                    <p class="text-xs" style="color: var(--text-tertiary);">${topic.score}/${topic.total}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    document.getElementById('recentTopics').innerHTML = topicsHTML;
+                } else {
+                    document.getElementById('recentTopics').innerHTML = `
+                        <div class="card" style="text-align: center; padding: var(--space-8);">
+                            <div style="font-size: 48px; margin-bottom: var(--space-4); font-weight: bold;">Start</div>
+                            <h4 style="margin-bottom: var(--space-2);">No recent activity</h4>
+                            <p style="color: var(--text-secondary); margin-bottom: var(--space-6);">Start learning to see your progress here</p>
+                            <a href="/module" class="btn btn-primary">Start Your First Lesson</a>
+                        </div>
+                    `;
+                }
+
+                // Create performance chart
+                createPerformanceChart(data.recent_topics || []);
+
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        // Create performance chart
+        function createPerformanceChart(topics) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+
+            // Prepare data (reverse to show oldest to newest)
+            const reversedTopics = [...topics].reverse();
+            const labels = reversedTopics.map(t => t.topic.substring(0, 20) + (t.topic.length > 20 ? '...' : ''));
+            const scores = reversedTopics.map(t => Math.round((t.score / t.total) * 100));
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quiz Score (%)',
+                        data: scores,
+                        borderColor: '#6366F1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#6366F1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#111827',
+                            titleColor: '#E5E7EB',
+                            bodyColor: '#9CA3AF',
+                            borderColor: '#1F2937',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: '#1F2937'
+                            },
+                            ticks: {
+                                color: '#9CA3AF',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#9CA3AF'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load stats on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardStats();
+        });
+    </script>
+</body>
+</html>

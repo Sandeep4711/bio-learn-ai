@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assessment Terminal | BioLearn AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #020617; color: #e2e8f0; }
+        .glass-card { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .option-btn { border: 1px solid rgba(16, 185, 129, 0.1); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .option-btn:hover { background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.5); transform: translateX(5px); }
+    </style>
+</head>
+<body class="min-h-screen">
+    <nav class="p-6">
+        <div class="container mx-auto flex justify-between items-center glass-card px-8 py-4 rounded-2xl">
+            <h1 class="font-black text-emerald-400 tracking-tighter italic">🧬 ASSESSMENT_MODULE</h1>
+            <span class="text-[10px] font-mono text-slate-500">ENCRYPTION: ACTIVE</span>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-12 px-4 max-w-3xl">
+        <div id="quiz-loading" class="text-center py-20">
+            <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-emerald-500 font-mono text-xs animate-pulse">GENERATING_EVALUATION_PARAMETERS...</p>
+        </div>
+
+        <div id="quiz-container" class="hidden glass-card p-10 rounded-3xl shadow-2xl">
+            <div class="flex justify-between items-center mb-8">
+                <span id="question-number" class="text-emerald-500 font-mono text-xs tracking-widest uppercase">QUESTION_01</span>
+                <div class="h-[2px] w-24 bg-slate-800 relative overflow-hidden">
+                    <div id="progress-bar" class="absolute inset-0 bg-emerald-500 w-0 transition-all duration-500"></div>
+                </div>
+            </div>
+            
+            <h2 id="question-text" class="text-2xl font-bold text-white mb-10 leading-tight"></h2>
+            <div id="options-grid" class="space-y-4"></div>
+
+            <div class="mt-12 flex justify-end">
+                    <button id="next-btn" onclick="nextQuestion()" disabled
+                        class="bg-slate-800 text-slate-600 px-10 py-4 rounded-2xl font-black uppercase tracking-tighter transition-all cursor-not-allowed">
+                    Next →
+                </button>
+            </div>
+        </div>
+
+        <div id="results-container" class="hidden text-center glass-card p-16 rounded-3xl border-t-4 border-emerald-500">
+            <h2 class="text-4xl font-black text-white mb-4">ASSESSMENT_RESULTS</h2>
+            <p id="score-text" class="text-7xl font-black text-emerald-400 my-8">0/5</p>
+            <p class="text-slate-500 font-mono text-xs mb-10 uppercase tracking-widest">Data Uploaded to Central Research Repository</p>
+            <button onclick="window.location.href='/analytics'" class="bg-emerald-600 hover:bg-emerald-500 text-slate-900 px-10 py-5 rounded-2xl font-black uppercase tracking-tighter shadow-lg shadow-emerald-500/20">
+                Access Personal Analytics
+            </button>
+        </div>
+    </main>
+
+    <script>
+        let currentQuestions = [];
+        let currentIdx = 0;
+        let score = 0;
+
+        async function initQuiz() {
+            const content = localStorage.getItem('currentModule');
+            if(!content) return window.location.href = "/";
+            try {
+                const res = await fetch('/api/generate-quiz', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ content: content })
+                });
+                const data = await res.json();
+                currentQuestions = data.questions;
+                document.getElementById('quiz-loading').classList.add('hidden');
+                document.getElementById('quiz-container').classList.remove('hidden');
+                showQuestion();
+            } catch (e) { alert("ERROR: System could not synthesize quiz."); }
+        }
+
+        function showQuestion() {
+            const q = currentQuestions[currentIdx];
+            document.getElementById('question-number').innerText = `QUESTION_0${currentIdx + 1}`;
+            document.getElementById('question-text').innerText = q.question;
+            document.getElementById('progress-bar').style.width = ((currentIdx / currentQuestions.length) * 100) + "%";
+            
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+            
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full text-left p-5 rounded-2xl font-medium text-slate-300 flex justify-between items-center group";
+                btn.innerHTML = `<span>${opt}</span><span class="text-emerald-500 opacity-0"></span>`;
+                btn.onclick = () => selectOption(i, btn);
+                grid.appendChild(btn);
+            });
+
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = true;
+            nextBtn.className = "bg-slate-800 text-slate-600 px-10 py-4 rounded-2xl font-black uppercase tracking-tighter transition-all cursor-not-allowed";
+        }
+
+        function selectOption(idx, btn) {
+            const correct = currentQuestions[currentIdx].answer;
+            const buttons = document.getElementById('options-grid').children;
+            for(let b of buttons) b.onclick = null;
+
+            if(idx === correct) {
+                btn.classList.add('bg-emerald-500/10', 'border-emerald-500', 'text-emerald-400');
+                score++;
+            } else {
+                btn.classList.add('bg-red-500/10', 'border-red-500', 'text-red-400');
+                buttons[correct].classList.add('bg-emerald-500/10', 'border-emerald-500', 'text-emerald-400');
+            }
+
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = false;
+            nextBtn.classList.remove('bg-slate-800', 'text-slate-600', 'cursor-not-allowed');
+            nextBtn.classList.add('bg-emerald-600', 'text-slate-900', 'cursor-pointer', 'shadow-[0_0_20px_rgba(16,185,129,0.3)]');
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            if(currentIdx < currentQuestions.length) showQuestion();
+            else showResults();
+        }
+
+        async function showResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('results-container').classList.remove('hidden');
+            document.getElementById('score-text').innerText = `${score}/${currentQuestions.length}`;
+            
+            await fetch('/api/save-quiz', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    topic: localStorage.getItem('currentTopic'),
+                    score: score,
+                    total: currentQuestions.length
+                })
+            });
+        }
+        initQuiz();
+    </script>
+</body>
+</html>

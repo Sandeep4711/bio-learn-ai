@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioLearn AI | Central Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=JetBrains+Mono&display=swap');
+        body { background: radial-gradient(circle at top right, #064e3b, #020617 40%); font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
+        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .neon-glow:focus { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); border-color: #10b981; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <nav class="p-6">
+        <div class="container mx-auto flex justify-between items-center glass-panel px-8 py-4 rounded-2xl shadow-2xl">
+            <h1 class="text-2xl font-black text-emerald-400 italic">🧬 Research Terminal</h1>
+            <div class="flex gap-6 items-center">
+                <a href="/weekly-progress" class="text-xs font-mono text-emerald-500 hover:text-white transition tracking-widest uppercase">Progress</a>
+                <a href="/learning-path" class="text-xs font-mono text-emerald-500 hover:text-white transition tracking-widest uppercase">Learning Path</a>
+                <a href="/analytics" class="text-xs font-mono text-emerald-500 hover:text-white transition tracking-widest uppercase">Data Logs</a>
+                <a href="/logout" class="text-[10px] bg-red-500/10 text-red-400 px-3 py-1 rounded border border-red-500/20">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-20 px-4 flex flex-col items-center">
+        <div class="text-center mb-16">
+            <p class="text-emerald-500 font-mono text-xs tracking-[0.4em] uppercase mb-4 opacity-70">Synthesizer Status: Online</p>
+            <h2 class="text-6xl font-black tracking-tighter mb-4 text-white">Neural Biotech <span class="text-emerald-500">Link</span></h2>
+            <p class="text-slate-400 max-w-lg mx-auto font-medium leading-relaxed">Sequence and synthesize custom biotechnology modules across all university Complexity Tiers.</p>
+        </div>
+
+        <div class="w-full max-w-2xl glass-panel p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full"></div>
+
+            <div class="relative z-10">
+                <div class="mb-8">
+                    <label class="block text-[10px] font-black text-emerald-500 tracking-[0.3em] mb-4 uppercase ml-1">Research Subject</label>
+                    <input type="text" id="topicInput" placeholder="ENTER TOPIC (e.g. Stem Cells, mRNA)..." 
+                           class="w-full bg-slate-900/50 border border-slate-700 p-5 rounded-2xl text-white outline-none neon-glow transition-all font-mono placeholder:text-slate-700">
+                </div>
+
+                <div class="mb-12">
+                    <label class="block text-[10px] font-black text-emerald-500 tracking-[0.3em] mb-4 uppercase ml-1">Complexity Tier</label>
+                    <select id="levelSelect" class="w-full bg-slate-900/50 border border-slate-700 p-5 rounded-2xl text-white outline-none neon-glow transition-all appearance-none cursor-pointer">
+                        <option value="Undergraduate">Undergraduate Core</option>
+                        <option value="Graduate">Graduate Research</option>
+                        <option value="High School">Foundational Access</option>
+                    </select>
+                </div>
+
+                <button onclick="generateContent()" id="generateBtn" 
+                        class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-5 rounded-2xl shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all active:scale-[0.97] uppercase tracking-tighter text-xl">
+                    Execute Synthesis
+                </button>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden mt-12 text-center">
+            <div class="inline-block w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="mt-6 text-emerald-500 font-mono text-[10px] tracking-widest animate-pulse uppercase">Accessing Central Genomic Repository...</p>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+</body>
+</html>

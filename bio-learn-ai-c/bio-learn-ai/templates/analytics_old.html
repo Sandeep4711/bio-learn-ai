@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BioLearn Command | Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #020617; font-family: 'Space Grotesk', sans-serif; color: #e2e8f0; }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(16, 185, 129, 0.1); }
+        .stat-glow { text-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <nav class="p-6">
+        <div class="container mx-auto flex justify-between items-center glass-panel px-8 py-4 rounded-3xl">
+            <h1 class="text-xl font-black text-emerald-400 tracking-tighter uppercase italic">🧬 Analytics Dashboard</h1>
+            <div class="flex gap-4">
+                <a href="/weekly-progress" class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-lg border border-emerald-500/30 hover:text-white transition">Weekly Progress</a>
+                <a href="/learning-path" class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-lg border border-emerald-500/30 hover:text-white transition">Learning Path</a>
+                <a href="/terminal" class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-lg border border-emerald-500/30 hover:text-white transition">New Research</a>
+                <a href="/logout" class="text-xs font-mono text-red-400 bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/30">Log Out</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-8 px-4 pb-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="glass-panel p-8 rounded-3xl">
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Subject_Count</p>
+                <h3 class="text-5xl font-black text-white stat-glow">{{ history|length }}</h3>
+            </div>
+            <div class="glass-panel p-8 rounded-3xl">
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Average_Mastery</p>
+                <h3 id="avg-acc-display" class="text-5xl font-black text-emerald-400 stat-glow">--%</h3>
+            </div>
+            <div class="glass-panel p-8 rounded-3xl">
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">System_Rank</p>
+                <h3 class="text-3xl font-black text-blue-400 tracking-tighter">{% if history|length > 3 %} SENIOR_PI {% else %} RESEARCH_JUNIOR {% endif %}</h3>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            <div class="glass-panel p-10 rounded-3xl">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-8">Genomic Mastery Index</h4>
+                <div class="max-w-[240px] mx-auto"><canvas id="masteryChart"></canvas></div>
+            </div>
+            <div class="glass-panel p-10 rounded-3xl">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-8">Longitudinal Performance</h4>
+                <canvas id="topicChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-3xl overflow-hidden">
+            <div class="p-6 border-b border-slate-800 bg-emerald-500/5">
+                <h4 class="text-sm font-black text-emerald-400 uppercase tracking-widest">Historical Record Log</h4>
+            </div>
+            <table class="w-full text-left">
+                <thead class="bg-slate-900/50 text-slate-500 text-[10px] uppercase font-bold">
+                    <tr>
+                        <th class="p-5">Research Topic</th>
+                        <th class="p-5">Accuracy</th>
+                        <th class="p-5">Timestamp</th>
+                        <th class="p-5 text-right">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                    {% for item in history %}
+                    <tr class="hover:bg-emerald-500/5 transition-all">
+                        <td class="p-5 font-bold text-white capitalize">{{ item.topic }}</td>
+                        <td class="p-5 font-mono text-slate-400">{{ item.score }} / {{ item.total }}</td>
+                        <td class="p-5 font-mono text-white text-sm">
+                            {% if item.date_only and item.time_only %}
+                                {{ item.date_only.strftime('%Y-%m-%d') }} at {{ item.time_only.strftime('%H:%M:%S') }}
+                            {% else %}
+                                {{ item.date.strftime('%Y-%m-%d %H:%M:%S') }}
+                            {% endif %}
+                        </td>
+                        <td class="p-5 text-right">
+                            {% set perc = (item.score / item.total) * 100 %}
+                            <span class="text-[10px] font-black px-3 py-1 rounded border {{ 'text-emerald-400 border-emerald-500/30' if perc >= 70 else 'text-amber-400 border-amber-500/30' }}">
+                                {{ 'Mastered' if perc >= 70 else 'Review Required' }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const labels = [{% for item in history %}"{{ item.topic }}",{% endfor %}];
+        const dataValues = [{% for item in history %}({{ item.score }} / {{ item.total }}) * 100,{% endfor %}];
+        const avgMastery = dataValues.length > 0 ? Math.round(dataValues.reduce((a, b) => a + b, 0) / dataValues.length) : 0;
+        document.getElementById('avg-acc-display').innerText = avgMastery + '%';
+
+        const chartConfig = { color: '#94a3b8', font: { family: 'Space Grotesk' } };
+
+        new Chart(document.getElementById('masteryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Mastered', 'Pending'],
+                datasets: [{ data: [avgMastery, 100 - avgMastery], backgroundColor: ['#10b981', '#1e293b'], borderWidth: 0 }]
+            },
+            options: { cutout: '85%', plugins: { legend: { display: false } } }
+        });
+
+        new Chart(document.getElementById('topicChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{ label: 'Accuracy %', data: dataValues, backgroundColor: '#10b981', borderRadius: 10 }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true, max: 100, grid: { color: '#1e293b' }, ticks: chartConfig }, x: { grid: { display: false }, ticks: chartConfig } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+</body>
+</html>

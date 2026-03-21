@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Path | BioLearn AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="/terminal" class="sidebar-brand">
+            <img src="{{ url_for('static', filename='images/biolearn-logo.svg') }}" alt="BioLearn AI" style="width: 28px; height: 28px;">
+            <span>BioLearn AI</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <a href="/terminal" class="sidebar-link">
+                <span>Dashboard</span>
+            </a>
+            <a href="/module" class="sidebar-link">
+                <span>Lessons</span>
+            </a>
+            <a href="/quiz" class="sidebar-link">
+                <span>Quizzes</span>
+            </a>
+            <a href="/learning-path" class="sidebar-link active">
+                <span>Learning Path</span>
+            </a>
+            <a href="/weekly-progress" class="sidebar-link">
+                <span>Progress</span>
+            </a>
+            <a href="/analytics" class="sidebar-link">
+                <span>Analytics</span>
+            </a>
+            <a href="/profile" class="sidebar-link">
+                <span>Profile</span>
+            </a>
+        </nav>
+
+        <div style="margin-top: auto; padding-top: var(--space-8); border-top: 1px solid var(--border-primary);">
+            <a href="/logout" class="sidebar-link" style="color: var(--error);">
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-greeting">Learning Path</h1>
+            <p class="dashboard-subtitle">Create your personalized biotechnology learning journey</p>
+        </div>
+
+        {% if learning_path and learning_path.path_data %}
+        <!-- Existing Learning Path Display -->
+        <div id="existingPath" class="card card-elevated" style="max-width: 1000px; margin: 0 auto; padding: 48px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+                <h3 style="font-size: var(--text-2xl); font-weight: 700;">
+                    Your Learning Journey
+                </h3>
+                <button onclick="showPathGenerator()" class="btn btn-secondary">
+                    Generate New Path
+                </button>
+            </div>
+
+            <div style="padding: 24px; background: var(--bg-surface); border-radius: var(--radius-md); margin-bottom: var(--space-8);">
+                <p style="color: var(--text-secondary); font-size: 16px;">
+                    {{ learning_path.path_data|length }} Topics • {{ (learning_path.path_data|length * 8)|int }} Hours Total
+                </p>
+            </div>
+
+            <!-- Weekly Study Plan -->
+            {% if learning_path.weekly_plan %}
+            {% for week in learning_path.weekly_plan %}
+            {% set week_idx = loop.index0 %}
+            <div style="margin-bottom: var(--space-8);">
+                <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4); padding: 16px; background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); border-radius: var(--radius-md); color: white;">
+                    <h4 style="font-size: 20px; font-weight: 700; color: white;">Week {{ loop.index }}</h4>
+                    <span style="opacity: 0.9;">{{ week.get('focus_area', week.get('activities', ['Study'])[0] if week.get('activities') else 'Study') }}</span>
+                    <span style="margin-left: auto; font-size: 14px; opacity: 0.8;">{{ week.get('time_allocation', 8) }} hours</span>
+                </div>
+
+                <!-- Daily Schedule for this week -->
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px;">
+                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                    <div class="card" style="padding: 16px; min-height: 120px;">
+                        <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px; font-size: 12px;">{{ day[:3] }}</div>
+
+                        {% if loop.index <= 5 %}
+                        <!-- Study days (Mon-Fri) -->
+                        {% set topic_index = ((week_idx * 5 + loop.index0) % learning_path.path_data|length) %}
+                        {% set current_topic = learning_path.path_data[topic_index] if learning_path.path_data %}
+
+                        {% if current_topic %}
+                        <div>
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                                {{ current_topic['topic'][:25] }}{% if current_topic['topic']|length > 25 %}...{% endif %}
+                            </div>
+                            <div style="font-size: 10px; color: var(--text-tertiary); margin-bottom: 8px;">
+                                {{ (current_topic['duration_hours'] / 5)|round(1) }}h study
+                            </div>
+                            <div style="font-size: 9px; padding: 2px 6px; background: var(--bg-surface); border-radius: 4px; color: var(--text-secondary);">
+                                {{ current_topic['difficulty']|title }}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div style="color: var(--text-tertiary); font-size: 10px;">Review day</div>
+                        {% endif %}
+
+                        {% elif loop.index == 6 %}
+                        <!-- Saturday - Practice/Review -->
+                        <div>
+                            <div style="font-size: 11px; font-weight: 600; color: var(--accent); margin-bottom: 4px;">Practice Day</div>
+                            <div style="font-size: 10px; color: var(--text-tertiary); margin-bottom: 8px;">Quiz & Review</div>
+                            <div style="font-size: 9px; padding: 2px 6px; background: rgba(34, 211, 238, 0.1); border-radius: 4px; color: var(--accent);">
+                                Assessment
+                            </div>
+                        </div>
+
+                        {% else %}
+                        <!-- Sunday - Rest -->
+                        <div>
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 4px;">Rest Day</div>
+                            <div style="font-size: 10px; color: var(--text-tertiary);">Relax & Recharge</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Week Summary -->
+                <div style="margin-top: var(--space-4); padding: 12px; background: var(--bg-surface); border-radius: var(--radius-md); font-size: 12px; color: var(--text-secondary);">
+                    <strong>Week {{ loop.index }} Goals:</strong> {{ week.get('focus_area', week.get('activities', ['Study'])[0] if week.get('activities') else 'Study') }} •
+                    <strong>Study Time:</strong> {{ week.get('time_allocation', 8) }} hours •
+                    <strong>Activities:</strong> 5 days learning, 1 day practice, 1 day rest
+                </div>
+            </div>
+            {% endfor %}
+
+            {% else %}
+            <!-- Fallback: Generate basic weekly structure from topics -->
+            {% for chunk in learning_path.path_data|batch(2) %}
+            {% set week_num = loop.index0 %}
+            <div style="margin-bottom: var(--space-8);">
+                <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4); padding: 16px; background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); border-radius: var(--radius-md); color: white;">
+                    <h4 style="font-size: 20px; font-weight: 700; color: white;">Week {{ loop.index }}</h4>
+                    <span style="opacity: 0.9;">Focus: {{ chunk[0]['topic'] if chunk[0] }}</span>
+                    <span style="margin-left: auto; font-size: 14px; opacity: 0.8;">{{ (chunk|length * 4)|int }} hours</span>
+                </div>
+
+                <!-- Daily Schedule -->
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px;">
+                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                    {% set day_idx = loop.index0 %}
+                    <div class="card" style="padding: 16px; min-height: 120px;">
+                        <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px; font-size: 12px;">{{ day[:3] }}</div>
+
+                        {% if loop.index <= 5 and chunk[(day_idx // 3) % chunk|length] %}
+                        <!-- Study days -->
+                        {% set topic = chunk[(day_idx // 3) % chunk|length] %}
+                        <div>
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                                {{ topic['topic'][:25] }}{% if topic['topic']|length > 25 %}...{% endif %}
+                            </div>
+                            <div style="font-size: 10px; color: var(--text-tertiary); margin-bottom: 8px;">
+                                2-3h study
+                            </div>
+                            <div style="font-size: 9px; padding: 2px 6px; background: var(--bg-surface); border-radius: 4px; color: var(--text-secondary);">
+                                {{ topic['difficulty']|title }}
+                            </div>
+                        </div>
+                        {% elif loop.index == 6 %}
+                        <!-- Saturday - Practice -->
+                        <div>
+                            <div style="font-size: 11px; font-weight: 600; color: var(--accent); margin-bottom: 4px;">Practice Day</div>
+                            <div style="font-size: 10px; color: var(--text-tertiary); margin-bottom: 8px;">Quiz & Review</div>
+                            <div style="font-size: 9px; padding: 2px 6px; background: rgba(34, 211, 238, 0.1); border-radius: 4px; color: var(--accent);">
+                                Assessment
+                            </div>
+                        </div>
+                        {% else %}
+                        <!-- Sunday - Rest -->
+                        <div>
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 4px;">Rest Day</div>
+                            <div style="font-size: 10px; color: var(--text-tertiary);">Relax & Recharge</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div style="text-align: center; margin-top: var(--space-12); padding-top: var(--space-8); border-top: 1px solid var(--border-primary);">
+                <div style="margin-bottom: var(--space-4);">
+                    <p style="color: var(--text-secondary); margin-bottom: var(--space-2);">Ready to start your structured learning journey?</p>
+                    <p style="font-size: 14px; color: var(--text-tertiary);">Follow the daily plan above for optimal learning progression</p>
+                </div>
+                <a href="/module" class="btn btn-primary btn-lg">
+                    Start Today's Study Session
+                </a>
+            </div>
+        </div>
+
+        {% endif %}
+
+        <!-- Learning Path Generator Form (Always available) -->
+        <div id="pathGenerator" class="card card-elevated" style="max-width: 800px; margin: 0 auto; padding: 48px; {% if learning_path and learning_path.path_data %}display: none;{% endif %}">
+            <div style="text-align: center; margin-bottom: var(--space-8);">
+                {% if learning_path and learning_path.path_data %}
+                <button onclick="backToExistingPath()" class="btn btn-ghost" style="float: right; margin-top: -10px;">
+                    ← Back to Your Path
+                </button>
+                <div style="padding: 12px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); color: var(--primary); border-radius: 10px; font-size: 14px; margin-bottom: 24px;">
+                    NOTE: You already have a learning path. Generating a new one will replace your current path.
+                </div>
+                {% endif %}
+                <h3 style="font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-4);">
+                    {% if learning_path and learning_path.path_data %}Replace Your Learning Path{% else %}Generate Your Learning Path{% endif %}
+                </h3>
+                <p style="color: var(--text-secondary); font-size: 16px;">
+                    Tell us about your goals and we'll create a personalized study plan
+                </p>
+            </div>
+
+            <form id="pathForm" style="display: flex; flex-direction: column; gap: var(--space-6);">
+                <div class="form-group">
+                    <label class="form-label">Learning Goal</label>
+                    <input
+                        type="text"
+                        id="goalInput"
+                        class="input"
+                        placeholder="e.g., Master CRISPR technology, Understand vaccine development"
+                        style="font-size: 16px;"
+                        required
+                    >
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                    <div class="form-group">
+                        <label class="form-label">Time Commitment</label>
+                        <select id="timeInput" class="input" style="font-size: 16px;" required>
+                            <option value="">Select hours per week</option>
+                            <option value="2">2 hours/week</option>
+                            <option value="5">5 hours/week</option>
+                            <option value="10">10 hours/week</option>
+                            <option value="15">15 hours/week</option>
+                            <option value="20">20+ hours/week</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Current Level</label>
+                        <select id="levelInput" class="input" style="font-size: 16px;" required>
+                            <option value="">Select your level</option>
+                            <option value="high_school">High School</option>
+                            <option value="undergraduate">Undergraduate</option>
+                            <option value="graduate">Graduate</option>
+                            <option value="professional">Professional</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                    <div class="form-group">
+                        <label class="form-label">Duration</label>
+                        <select id="durationInput" class="input" style="font-size: 16px;" required>
+                            <option value="">Select duration</option>
+                            <option value="4">4 weeks</option>
+                            <option value="8">8 weeks</option>
+                            <option value="12">12 weeks</option>
+                            <option value="16">16 weeks</option>
+                            <option value="24">24 weeks</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Learning Style</label>
+                        <select id="styleInput" class="input" style="font-size: 16px;">
+                            <option value="visual">Visual</option>
+                            <option value="reading" selected>Reading</option>
+                            <option value="hands_on">Hands-on</option>
+                            <option value="mixed">Mixed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" id="generateBtn" class="btn btn-primary btn-lg" style="margin-top: var(--space-4);">
+                    <span id="btnText">Generate Learning Path</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('pathForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const goal = document.getElementById('goalInput').value.trim();
+            const time = document.getElementById('timeInput').value;
+            const level = document.getElementById('levelInput').value;
+            const duration = document.getElementById('durationInput').value;
+            const style = document.getElementById('styleInput').value;
+
+            const btn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('btnText');
+
+            if (!goal || !time || !level || !duration) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Show loading
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+            btnText.textContent = 'Generating Path...';
+
+            try {
+                // Create or update learner profile first
+                await fetch('/api/create-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        learning_goal: goal,
+                        study_hours_per_week: parseInt(time),
+                        education_level: level,
+                        target_duration_weeks: parseInt(duration),
+                        learning_style: style,
+                        knowledge_level: level
+                    })
+                });
+
+                // Generate learning path
+                const response = await fetch('/api/generate-learning-path', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        goal: goal,
+                        time: time,
+                        level: level
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate learning path');
+                }
+
+                // Reload page to show generated path
+                window.location.reload();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate learning path. Please try again.');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+                btnText.textContent = 'Generate Learning Path';
+            }
+        });
+
+        function showPathGenerator() {
+            // Hide existing path and show generator form
+            const existingPath = document.getElementById('existingPath');
+            const pathGenerator = document.getElementById('pathGenerator');
+
+            console.log('Showing path generator...');
+
+            if (existingPath) {
+                existingPath.style.display = 'none';
+                console.log('Hidden existing path');
+            }
+            if (pathGenerator) {
+                pathGenerator.style.display = 'block';
+                console.log('Showed path generator form');
+
+                // Clear form inputs for fresh start
+                const goalInput = document.getElementById('goalInput');
+                const timeInput = document.getElementById('timeInput');
+                const levelInput = document.getElementById('levelInput');
+                const durationInput = document.getElementById('durationInput');
+                const styleInput = document.getElementById('styleInput');
+
+                if (goalInput) goalInput.value = '';
+                if (timeInput) timeInput.value = '';
+                if (levelInput) levelInput.value = '';
+                if (durationInput) durationInput.value = '';
+                if (styleInput) styleInput.value = 'reading';
+
+                console.log('Cleared form inputs');
+            }
+        }
+
+        function backToExistingPath() {
+            // Hide generator form and show existing path
+            const existingPath = document.getElementById('existingPath');
+            const pathGenerator = document.getElementById('pathGenerator');
+
+            console.log('Going back to existing path...');
+
+            if (existingPath) {
+                existingPath.style.display = 'block';
+                console.log('Showed existing path');
+            }
+            if (pathGenerator) {
+                pathGenerator.style.display = 'none';
+                console.log('Hidden path generator form');
+            }
+        }
+    </script>
+</body>
+</html>

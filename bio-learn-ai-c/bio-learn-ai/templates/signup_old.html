@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BioLearn AI | Create Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%); font-family: 'Space Grotesk', sans-serif; }
+        .glass-terminal { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .neon-input:focus { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); border-color: #10b981; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-12">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <span class="text-4xl">🧬</span>
+            </div>
+            <h1 class="text-4xl font-black text-white mb-2 tracking-tight">BioLearn AI</h1>
+            <p class="text-slate-400">Create your account</p>
+        </div>
+
+        <div class="glass-terminal p-10 rounded-2xl">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-lg mb-6 text-sm">
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" autocomplete="on">
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-white mb-2">Email or Username</label>
+                    <input type="text" name="username" autocomplete="username" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white outline-none neon-input transition-all" placeholder="your@email.com" required>
+                </div>
+                <div class="mb-8">
+                    <label class="block text-sm font-semibold text-white mb-2">Password</label>
+                    <input type="password" name="password" autocomplete="new-password" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white outline-none neon-input transition-all" placeholder="Create a password" required>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-lg transition-all shadow-lg uppercase tracking-tight text-sm">
+                    Create Account
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-slate-400 text-sm">
+                    Already have an account? 
+                    <a href="/login" class="text-emerald-400 hover:text-emerald-300 font-semibold transition">
+                        Sign in
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <p class="text-center text-slate-500 text-xs mt-8 font-mono">© 2026 BioLearn AI</p>
+    </div>
+</body>
+</html>

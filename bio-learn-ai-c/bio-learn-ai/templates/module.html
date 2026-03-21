@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lessons | BioLearn AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        .prose h1, .prose h2, .prose h3 {
+            color: var(--primary);
+            margin-top: 2em;
+            margin-bottom: 0.5em;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-primary);
+        }
+        .prose p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1em;
+        }
+        .prose strong {
+            color: var(--text-primary);
+        }
+        .prose ul, .prose ol {
+            color: var(--text-secondary);
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="/terminal" class="sidebar-brand">
+            <img src="{{ url_for('static', filename='images/biolearn-logo.svg') }}" alt="BioLearn AI" style="width: 28px; height: 28px;">
+            <span>BioLearn AI</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <a href="/terminal" class="sidebar-link">
+                <span>Dashboard</span>
+            </a>
+            <a href="/module" class="sidebar-link active">
+                <span>Lessons</span>
+            </a>
+            <a href="/quiz" class="sidebar-link">
+                <span>Quizzes</span>
+            </a>
+            <a href="/learning-path" class="sidebar-link">
+                <span>Learning Path</span>
+            </a>
+            <a href="/weekly-progress" class="sidebar-link">
+                <span>Progress</span>
+            </a>
+            <a href="/analytics" class="sidebar-link">
+                <span>Analytics</span>
+            </a>
+            <a href="/profile" class="sidebar-link">
+                <span>Profile</span>
+            </a>
+        </nav>
+
+        <div style="margin-top: auto; padding-top: var(--space-8); border-top: 1px solid var(--border-primary);">
+            <a href="/logout" class="sidebar-link" style="color: var(--error);">
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-container" style="display: flex; gap: 32px;">
+        <!-- Main Content Area -->
+        <div style="flex: 1;">
+            <!-- Generate Lesson Form -->
+            <div id="generateForm">
+                <div class="dashboard-header" style="text-align: center;">
+                    <h1 class="dashboard-greeting">Generate AI Lesson</h1>
+                    <p class="dashboard-subtitle">Create personalized learning content on any biotechnology topic</p>
+                </div>
+
+                <div class="card card-elevated" style="max-width: 800px; padding: 48px; margin: 0 auto;">
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label class="form-label">Topic</label>
+                        <input
+                            type="text"
+                            id="topicInput"
+                            class="input"
+                            placeholder="e.g., CRISPR Gene Editing, mRNA Vaccines, Stem Cells"
+                            style="font-size: 16px;"
+                        >
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 32px;">
+                        <label class="form-label">Complexity Level</label>
+                        <select id="levelSelect" class="input" style="font-size: 16px;">
+                            <option value="High School">High School</option>
+                            <option value="Undergraduate" selected>Undergraduate</option>
+                            <option value="Graduate">Graduate/Research</option>
+                        </select>
+                    </div>
+
+                    <button onclick="generateContent()" id="generateBtn" class="btn btn-primary btn-lg" style="width: 100%;">
+                        <span id="btnText">Generate Lesson</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Lesson Content (Hidden initially) -->
+            <div id="contentView" class="hidden">
+                <div class="card card-elevated" style="padding: 48px;">
+                    <div style="margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div>
+                            <div style="font-size: 12px; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                                Lesson Topic
+                            </div>
+                            <h1 id="topicTitle" style="font-size: 36px; font-weight: 800; color: var(--text-primary); margin: 0;">
+                            </h1>
+                        </div>
+                        <button onclick="showGenerateForm()" class="btn btn-secondary">
+                            New Lesson
+                        </button>
+                    </div>
+
+                    <div id="contentArea" class="prose" style="max-width: none;">
+                        <!-- AI-generated content will appear here -->
+                    </div>
+
+                    <div style="margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--border-primary); display: flex; justify-content: space-between; align-items: center;">
+                        <p style="color: var(--text-tertiary); font-size: 14px;">
+                            Ready to test your knowledge?
+                        </p>
+                        <button onclick="goToQuiz()" class="btn btn-primary btn-lg">
+                            Take Quiz
+                            <span>→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lesson History Sidebar -->
+        <div id="lessonHistorySidebar" style="width: 350px; flex-shrink: 0;">
+            <div class="card" style="padding: 24px; max-height: 80vh; overflow-y: auto;">
+                <h3 style="margin-bottom: 20px; color: var(--text-primary); font-size: 18px;">
+                    Lesson History
+                </h3>
+
+                <div id="lessonHistoryList">
+                    <!-- Lesson history items will be loaded here -->
+                    <div id="loadingHistory" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        Loading history...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if content exists in localStorage on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const content = localStorage.getItem('currentModule');
+            const topic = localStorage.getItem('currentTopic');
+
+            if (content && topic) {
+                showContent(content, topic);
+            }
+
+            // Load lesson history
+            loadLessonHistory();
+        });
+
+        // Load lesson history from server
+        async function loadLessonHistory() {
+            try {
+                const response = await fetch('/api/lesson-history');
+                if (!response.ok) throw new Error('Failed to load history');
+
+                const data = await response.json();
+                displayLessonHistory(data.lessons);
+            } catch (error) {
+                console.error('Error loading history:', error);
+                document.getElementById('loadingHistory').textContent = 'Failed to load history';
+            }
+        }
+
+        // Display lesson history in sidebar
+        function displayLessonHistory(lessons) {
+            const historyList = document.getElementById('lessonHistoryList');
+            const loading = document.getElementById('loadingHistory');
+
+            if (loading) loading.remove();
+
+            if (lessons.length === 0) {
+                historyList.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        <p>No previous lessons yet</p>
+                        <p style="font-size: 12px;">Generate your first lesson to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyList.innerHTML = '';
+            lessons.forEach(lesson => {
+                const lessonItem = document.createElement('div');
+                lessonItem.className = 'card card-clickable';
+                lessonItem.style.cssText = `
+                    padding: 16px;
+                    margin-bottom: 12px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    border-left: 3px solid var(--primary);
+                `;
+
+                lessonItem.innerHTML = `
+                    <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                        ${lesson.topic.length > 35 ? lesson.topic.substring(0, 35) + '...' : lesson.topic}
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">
+                        ${lesson.level} • ${lesson.created_at}
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-tertiary);">
+                        Click to view lesson
+                    </div>
+                `;
+
+                lessonItem.addEventListener('click', () => loadPreviousLesson(lesson.id, lesson.topic));
+                historyList.appendChild(lessonItem);
+            });
+        }
+
+        // Load a previous lesson by ID
+        async function loadPreviousLesson(lessonId, topic) {
+            try {
+                const response = await fetch(`/api/lesson-history/${lessonId}`);
+                if (!response.ok) throw new Error('Failed to load lesson');
+
+                const lesson = await response.json();
+                showContent(lesson.content, lesson.topic);
+
+                // Don't save to localStorage for historical lessons
+            } catch (error) {
+                console.error('Error loading lesson:', error);
+                alert('Failed to load previous lesson');
+            }
+        }
+
+        async function generateContent() {
+            const topic = document.getElementById('topicInput').value.trim();
+            const level = document.getElementById('levelSelect').value;
+            const btn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('btnText');
+
+            if (!topic) {
+                alert('Please enter a topic');
+                return;
+            }
+
+            // Show loading on button
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+            btnText.textContent = 'Generating...';
+
+            try {
+                const response = await fetch('/api/generate-topic', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic: topic, level: level })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate lesson');
+                }
+
+                const data = await response.json();
+
+                if (data.content) {
+                    // If reset signal is received, clear previous lesson
+                    if (data.reset_current) {
+                        localStorage.removeItem('currentModule');
+                        localStorage.removeItem('currentTopic');
+                    }
+
+                    // Store new lesson in localStorage
+                    localStorage.setItem('currentModule', data.content);
+                    localStorage.setItem('currentTopic', topic);
+                    showContent(data.content, topic);
+
+                    // Refresh lesson history to show the new lesson
+                    loadLessonHistory();
+                } else {
+                    throw new Error('No content received');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate lesson. Please try again.');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+                btnText.textContent = 'Generate Lesson';
+            }
+        }
+
+        function showContent(content, topic) {
+            document.getElementById('generateForm').classList.add('hidden');
+            document.getElementById('contentView').classList.remove('hidden');
+            document.getElementById('topicTitle').textContent = topic;
+
+            // Configure Marked for rendering
+            marked.setOptions({
+                breaks: true,
+                gfm: true
+            });
+
+            document.getElementById('contentArea').innerHTML = marked.parse(content);
+        }
+
+        function showGenerateForm() {
+            document.getElementById('contentView').classList.add('hidden');
+            document.getElementById('generateForm').classList.remove('hidden');
+        }
+
+        function goToQuiz() {
+            window.location.href = '/quiz';
+        }
+    </script>
+</body>
+</html>

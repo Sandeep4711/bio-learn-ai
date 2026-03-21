@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center - BioLearn AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <img src="{{ url_for('static', filename='images/biolearn-logo.svg') }}" alt="BioLearn AI" class="brand-logo">
+            <span class="brand-text">BioLearn AI</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="sidebar-link">
+                <span class="sidebar-text">Dashboard</span>
+            </a>
+            <a href="/learning-path" class="sidebar-link">
+                <span class="sidebar-text">Learning Path</span>
+            </a>
+            <a href="/quiz" class="sidebar-link">
+                <span class="sidebar-text">Quiz</span>
+            </a>
+            <a href="/profile" class="sidebar-link">
+                <span class="sidebar-text">Profile</span>
+            </a>
+            <a href="/settings" class="sidebar-link">
+                <span class="sidebar-text">Settings</span>
+            </a>
+            <a href="/help" class="sidebar-link active">
+                <span class="sidebar-text">Help</span>
+            </a>
+            <a href="/logout" class="sidebar-link">
+                <span class="sidebar-text">Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-container">
+            <div class="page-header">
+                <h1 class="page-title">Help Center</h1>
+            </div>
+
+            <div class="help-container">
+                <!-- FAQ Section -->
+                <div class="help-section">
+                    <h2>Frequently Asked Questions</h2>
+                    <div class="faq-container">
+                        <div class="faq-item">
+                            <button class="faq-question">How do I start my first learning path?</button>
+                            <div class="faq-answer">
+                                <p>To start your first learning path:</p>
+                                <ol>
+                                    <li>Go to the Learning Path section from the sidebar</li>
+                                    <li>Choose from available topics or create a custom path</li>
+                                    <li>Set your learning goals and preferences</li>
+                                    <li>Click "Start Learning" to begin your journey</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question">How are quiz scores calculated?</button>
+                            <div class="faq-answer">
+                                <p>Quiz scores are calculated based on:</p>
+                                <ul>
+                                    <li>Correct answers (weighted by difficulty)</li>
+                                    <li>Time taken to complete the quiz</li>
+                                    <li>Number of attempts</li>
+                                    <li>Bonus points for streaks and improvements</li>
+                                </ul>
+                                <p>Your overall progress affects your learning path recommendations.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question">Can I customize my learning experience?</button>
+                            <div class="faq-answer">
+                                <p>Yes! You can customize:</p>
+                                <ul>
+                                    <li>Learning pace and difficulty level in Settings</li>
+                                    <li>Notification preferences</li>
+                                    <li>Study reminders and goals</li>
+                                    <li>Quiz types and formats</li>
+                                    <li>Dark/light theme preferences</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question">How do I track my progress?</button>
+                            <div class="faq-answer">
+                                <p>Your progress is tracked through:</p>
+                                <ul>
+                                    <li>Dashboard overview with key metrics</li>
+                                    <li>Profile page with detailed statistics</li>
+                                    <li>Learning path completion status</li>
+                                    <li>Quiz history and performance trends</li>
+                                    <li>Study streak tracking</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question">What should I do if I'm struggling with a topic?</button>
+                            <div class="faq-answer">
+                                <p>If you're having difficulty:</p>
+                                <ul>
+                                    <li>Review previous lessons in the learning path</li>
+                                    <li>Take practice quizzes to reinforce concepts</li>
+                                    <li>Adjust your learning pace in Settings</li>
+                                    <li>Check the additional resources provided</li>
+                                    <li>Contact support for personalized help</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question">Is my learning data private and secure?</button>
+                            <div class="faq-answer">
+                                <p>Yes, your privacy is our priority:</p>
+                                <ul>
+                                    <li>All data is encrypted and stored securely</li>
+                                    <li>You control your privacy settings</li>
+                                    <li>Data is only used to improve your learning experience</li>
+                                    <li>You can export or delete your data anytime</li>
+                                    <li>We never share personal information with third parties</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question">Can I retake quizzes to improve my score?</button>
+                            <div class="faq-answer">
+                                <p>Yes, you can retake quizzes multiple times:</p>
+                                <ul>
+                                    <li>Access previous quizzes from your Quiz history</li>
+                                    <li>Retake as many times as you want</li>
+                                    <li>Your highest score is recorded for your profile</li>
+                                    <li>Practice mode allows unlimited attempts</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question">How do I update my profile information?</button>
+                            <div class="faq-answer">
+                                <p>To update your profile:</p>
+                                <ol>
+                                    <li>Click on your Profile in the sidebar</li>
+                                    <li>Click the "Edit" button at the top</li>
+                                    <li>Update your personal information</li>
+                                    <li>Save your changes by clicking "Save Changes"</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question">What does my learning streak mean?</button>
+                            <div class="faq-answer">
+                                <p>Your learning streak represents:</p>
+                                <ul>
+                                    <li>Consecutive days of learning activity</li>
+                                    <li>Includes lessons, quizzes, and assessments</li>
+                                    <li>Breaks if you miss a day of activity</li>
+                                    <li>Earn bonus points for maintaining streaks</li>
+                                    <li>Track your consistency and commitment to learning</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question">How can I get help if my question isn't answered here?</button>
+                            <div class="faq-answer">
+                                <p>You can reach out to our support team:</p>
+                                <ul>
+                                    <li>Use the Live Chat feature below</li>
+                                    <li>Email us at support@biolearn-ai.com</li>
+                                    <li>Response time: 24 hours or less</li>
+                                    <li>Our team is here to help with any questions</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Support -->
+                <div class="help-section">
+                    <h2>Need Additional Help?</h2>
+                    <div class="contact-support">
+                        <p>Can't find your answer above? Chat with our support team for personalized assistance.</p>
+                        <button class="btn btn-primary" onclick="openLiveChat()" style="margin-top: var(--spacing-lg);">Start Live Chat</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FAQ Toggle Functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const answer = this.nextElementSibling;
+                const isOpen = answer.style.display === 'block';
+
+                // Close all other answers
+                document.querySelectorAll('.faq-answer').forEach(ans => {
+                    ans.style.display = 'none';
+                });
+
+                // Toggle current answer
+                answer.style.display = isOpen ? 'none' : 'block';
+
+                // Update button appearance
+                document.querySelectorAll('.faq-question').forEach(q => {
+                    q.classList.remove('active');
+                });
+
+                if (!isOpen) {
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // Search Functionality
+        const helpSearchInput = document.getElementById('helpSearch');
+        if (helpSearchInput) {
+            helpSearchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const faqItems = document.querySelectorAll('.faq-item');
+
+                faqItems.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    const shouldShow = text.includes(searchTerm) || searchTerm === '';
+                    item.style.display = shouldShow ? 'block' : 'none';
+                });
+            });
+        }
+
+        // Smooth scrolling for quick links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Live chat function (placeholder)
+        function openLiveChat() {
+            alert('Live chat will be available soon! Please use email support for now.');
+        }
+    </script>
+
+    <style>
+        .help-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .help-search {
+            margin-bottom: var(--spacing-xl);
+            width: 100%;
+            max-width: 700px;
+            display: none;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 100%;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: 1px solid #E5E7EB;
+            border-radius: var(--radius-md);
+            font-size: var(--text-base);
+            background: white;
+            color: #000000;
+        }
+
+        .search-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        .help-section {
+            margin-bottom: var(--spacing-xl);
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .help-section h2 {
+            color: var(--primary);
+            margin-bottom: var(--spacing-lg);
+            font-weight: 700;
+            font-size: var(--text-2xl);
+            text-align: center;
+        }
+
+        .quick-links {
+            display: none;
+        }
+
+        .guides-grid {
+            display: none;
+        }
+
+        .troubleshooting-grid {
+            display: none;
+        }
+
+        .faq-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .faq-item {
+            margin-bottom: 0;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            width: 100%;
+            padding: var(--spacing-lg);
+            background: none;
+            border: none;
+            text-align: left;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            position: relative;
+            color: var(--text-primary);
+            font-size: var(--text-base);
+        }
+
+        .faq-question:hover {
+            background: var(--background-secondary);
+        }
+
+        .faq-question.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .faq-question::after {
+            content: '+';
+            position: absolute;
+            right: var(--spacing-lg);
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .faq-question.active::after {
+            content: '−';
+        }
+
+        .faq-answer {
+            display: none;
+            padding: var(--spacing-lg);
+            background: var(--background-secondary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .faq-answer p, .faq-answer ul, .faq-answer ol {
+            margin-bottom: var(--spacing-md);
+            color: var(--text-secondary);
+        }
+
+        .faq-answer li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .guides-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            display: none;
+        }
+
+        .guide-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            background: var(--background-secondary);
+            display: none;
+        }
+
+        .guide-card h3 {
+            color: var(--primary);
+            margin: 0 0 var(--spacing-md) 0;
+            font-weight: 700;
+        }
+
+        .guide-content h4 {
+            margin: var(--spacing-md) 0 var(--spacing-sm) 0;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .guide-content p {
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .guide-content ul, .guide-content ol {
+            padding-left: var(--spacing-lg);
+            color: var(--text-secondary);
+        }
+
+        .guide-content li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .troubleshooting-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: var(--spacing-lg);
+            display: none;
+        }
+
+        .trouble-item {
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--background-secondary);
+            display: none;
+        }
+
+        .trouble-item h4 {
+            color: var(--primary);
+            margin: 0 0 var(--spacing-md) 0;
+            font-weight: 600;
+        }
+
+        .trouble-item ul {
+            padding-left: var(--spacing-lg);
+            color: var(--text-secondary);
+        }
+
+        .trouble-item li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .contact-support {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-lg);
+        }
+
+        .contact-support p {
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+
+        .contact-support .btn {
+            align-self: center;
+        }
+
+        @media (max-width: 768px) {
+            .help-container {
+                padding: 0 var(--spacing-md);
+                align-items: center;
+            }
+
+            .help-section {
+                padding: var(--spacing-lg);
+                max-width: 100%;
+            }
+
+            .help-search {
+                max-width: 100%;
+            }
+        }
+    </style>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

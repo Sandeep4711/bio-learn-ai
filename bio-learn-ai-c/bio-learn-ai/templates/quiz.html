@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz | BioLearn AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+    <style>
+        .option-btn {
+            width: 100%;
+            text-align: left;
+            padding: 20px 24px;
+            background: var(--bg-surface);
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: var(--bg-elevated);
+            transform: translateX(4px);
+        }
+
+        .option-btn.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .option-btn.incorrect {
+            border-color: var(--error);
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-surface);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="/terminal" class="sidebar-brand">
+            <img src="{{ url_for('static', filename='images/biolearn-logo.svg') }}" alt="BioLearn AI" style="width: 28px; height: 28px;">
+            <span>BioLearn AI</span>
+        </a>
+
+        <nav class="sidebar-nav">
+            <a href="/terminal" class="sidebar-link">
+                <span>Dashboard</span>
+            </a>
+            <a href="/module" class="sidebar-link">
+                <span>Lessons</span>
+            </a>
+            <a href="/quiz" class="sidebar-link active">
+                <span>Quizzes</span>
+            </a>
+            <a href="/learning-path" class="sidebar-link">
+                <span>Learning Path</span>
+            </a>
+            <a href="/weekly-progress" class="sidebar-link">
+                <span>Progress</span>
+            </a>
+            <a href="/analytics" class="sidebar-link">
+                <span>Analytics</span>
+            </a>
+            <a href="/profile" class="sidebar-link">
+                <span>Profile</span>
+            </a>
+        </nav>
+
+        <div style="margin-top: auto; padding-top: var(--space-8); border-top: 1px solid var(--border-primary);">
+            <a href="/logout" class="sidebar-link" style="color: var(--error);">
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="hidden">
+            <div class="dashboard-header" style="text-align: center;">
+                <h1 class="dashboard-greeting">Quiz Challenge</h1>
+                <p class="dashboard-subtitle" id="quiz-topic">Test your knowledge</p>
+            </div>
+
+            <div style="max-width: 800px; margin: 0 auto;">
+                <!-- Progress -->
+                <div style="margin-bottom: 32px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span id="question-number" style="font-size: 14px; font-weight: 600; color: var(--primary);">
+                            Question 1 of 5
+                        </span>
+                        <span id="score-display" style="font-size: 14px; color: var(--text-tertiary);">
+                            Score: 0/0
+                        </span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div class="card card-elevated" style="padding: 48px; margin-bottom: 24px;">
+                    <h2 id="question-text" style="font-size: 24px; font-weight: 600; color: var(--text-primary); margin-bottom: 32px; line-height: 1.4;">
+                        <!-- Question text here -->
+                    </h2>
+
+                    <div id="options-grid" style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Next Button -->
+                <div style="display: flex; justify-content: flex-end;">
+                    <button id="next-btn" onclick="nextQuestion()" disabled class="btn btn-secondary btn-lg">
+                        Next Question
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Container -->
+        <div id="results-container" class="hidden fade-in">
+            <div style="max-width: 600px; margin: 0 auto;">
+                <div class="card card-elevated" style="text-align: center; padding: 64px 32px; background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%);">
+                    <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 16px;">Quiz Complete!</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 48px;">Here's how you did:</p>
+
+                    <div id="score-text" style="font-size: 80px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;">
+                        0/5
+                    </div>
+
+                    <p id="percentage-text" style="font-size: 24px; font-weight: 600; color: var(--text-secondary); margin-bottom: 48px;">
+                        0%
+                    </p>
+
+                    <div style="padding: 24px; background: var(--bg-surface); border-radius: var(--radius-md); margin-bottom: 48px;">
+                        <p style="font-size: 14px; color: var(--text-tertiary); margin-bottom: 8px;">
+                            Your result has been saved to your progress
+                        </p>
+                        <p id="result-message" style="font-size: 16px; font-weight: 600; color: var(--text-primary);">
+                            <!-- Dynamic message based on score -->
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 16px; justify-content: center;">
+                        <a href="/analytics" class="btn btn-secondary btn-lg">
+                            View Analytics
+                        </a>
+                        <a href="/module" class="btn btn-primary btn-lg">
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestions = [];
+        let currentIdx = 0;
+        let score = 0;
+
+        async function initQuiz() {
+            const content = localStorage.getItem('currentModule');
+            const topic = localStorage.getItem('currentTopic');
+
+            if (!content) {
+                // Auto-redirect to lessons if no content
+                window.location.href = '/module';
+                return;
+            }
+
+            document.getElementById('quiz-topic').textContent = `Topic: ${topic}`;
+            document.getElementById('quiz-container').classList.remove('hidden');
+
+            try {
+                const res = await fetch('/api/generate-quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: content })
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to generate quiz');
+                }
+
+                const data = await res.json();
+                currentQuestions = data.questions;
+
+                showQuestion();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate quiz. Please try again.');
+                window.location.href = '/module';
+            }
+        }
+
+        function showQuestion() {
+            const q = currentQuestions[currentIdx];
+            const questionNum = currentIdx + 1;
+            const total = currentQuestions.length;
+
+            document.getElementById('question-number').textContent = `Question ${questionNum} of ${total}`;
+            document.getElementById('question-text').textContent = q.question;
+            document.getElementById('progress-fill').style.width = ((currentIdx / total) * 100) + '%';
+            document.getElementById('score-display').textContent = `Score: ${score}/${currentIdx}`;
+
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span>${opt}</span>`;
+                btn.onclick = () => selectOption(i, btn);
+                grid.appendChild(btn);
+            });
+
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = true;
+            nextBtn.className = 'btn btn-secondary btn-lg';
+            nextBtn.innerHTML = 'Next Question <span>→</span>';
+        }
+
+        function selectOption(idx, btn) {
+            const correct = currentQuestions[currentIdx].answer;
+            const buttons = document.getElementById('options-grid').children;
+
+            // Disable all buttons
+            for (let b of buttons) {
+                b.onclick = null;
+                b.disabled = true;
+            }
+
+            if (idx === correct) {
+                btn.classList.add('correct');
+                btn.innerHTML += '<span>✓</span>';
+                score++;
+            } else {
+                btn.classList.add('incorrect');
+                btn.innerHTML += '<span>✗</span>';
+                buttons[correct].classList.add('correct');
+                buttons[correct].innerHTML += '<span>✓</span>';
+            }
+
+            // Update score display
+            document.getElementById('score-display').textContent = `Score: ${score}/${currentIdx + 1}`;
+
+            // Enable next button and change text based on if it's last question
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = false;
+            nextBtn.className = 'btn btn-primary btn-lg';
+
+            // Check if this is the last question
+            if (currentIdx === currentQuestions.length - 1) {
+                nextBtn.innerHTML = 'Show Results <span>✓</span>';
+            } else {
+                nextBtn.innerHTML = 'Next Question <span>→</span>';
+            }
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            if (currentIdx < currentQuestions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        async function showResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('results-container').classList.remove('hidden');
+
+            const total = currentQuestions.length;
+            const percentage = Math.round((score / total) * 100);
+
+            document.getElementById('score-text').textContent = `${score}/${total}`;
+            document.getElementById('percentage-text').textContent = `${percentage}%`;
+
+            let message = '';
+            if (percentage >= 90) {
+                message = 'Outstanding! You mastered this topic!';
+            } else if (percentage >= 70) {
+                message = 'Great job! You have a strong understanding! 💪';
+            } else if (percentage >= 50) {
+                message = 'Good effort! Review the material to improve.';
+            } else {
+                message = 'Keep learning! Practice makes perfect.';
+            }
+            document.getElementById('result-message').textContent = message;
+
+            // Save quiz result
+            try {
+                const response = await fetch('/api/save-quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        topic: localStorage.getItem('currentTopic'),
+                        score: score,
+                        total: total
+                    })
+                });
+
+                if (response.ok) {
+                    const resultData = await response.json();
+
+                    // If server signals to reset current lesson, clear localStorage
+                    if (resultData.reset_current_lesson) {
+                        localStorage.removeItem('currentModule');
+                        localStorage.removeItem('currentTopic');
+                        console.log('Current lesson cleared after quiz completion');
+                    }
+                }
+            } catch (error) {
+                console.error('Error saving quiz:', error);
+            }
+        }
+
+        // Initialize quiz on page load
+        initQuiz();
+    </script>
+</body>
+</html>

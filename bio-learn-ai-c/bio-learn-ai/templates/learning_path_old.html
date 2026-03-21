@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Learning Path | BioLearn AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=JetBrains+Mono&display=swap');
+        body { background: linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%); font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .topic-card { transition: all 0.3s ease; border-left: 4px solid rgba(16, 185, 129, 0.2); }
+        .topic-card:hover { border-left-color: #10b981; transform: translateX(5px); }
+        .difficulty-beginner { background: rgba(34, 197, 94, 0.1); border-left-color: #22c55e; }
+        .difficulty-intermediate { background: rgba(59, 130, 246, 0.1); border-left-color: #3b82f6; }
+        .difficulty-advanced { background: rgba(239, 68, 68, 0.1); border-left-color: #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <nav class="p-6 border-b border-slate-800/50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black text-emerald-400">🧬 Learning Path</h1>
+            <div class="flex gap-4">
+                <a href="/weekly-progress" class="text-sm text-slate-400 hover:text-emerald-400 transition">Weekly Progress</a>
+                <a href="/terminal" class="text-sm text-slate-400 hover:text-emerald-400 transition">Research Terminal</a>
+                <a href="/analytics" class="text-sm text-slate-400 hover:text-emerald-400 transition">Analytics</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-12 max-w-6xl">
+        {% if not learning_path %}
+        <div class="text-center py-20 glass-panel rounded-2xl p-12 mb-12">
+            <h2 class="text-3xl font-black text-white mb-4">No Learning Path Yet</h2>
+            <p class="text-slate-400 mb-8">Set up your personal profile and generate an AI-powered learning roadmap tailored to your goals.</p>
+            <button onclick="showProfileForm()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-8 py-3 rounded-lg transition">
+                Generate My Path
+            </button>
+        </div>
+        {% else %}
+        <!-- Learning Path Overview -->
+        <div class="glass-panel p-8 rounded-2xl mb-8">
+            <h2 class="text-2xl font-black text-emerald-400 mb-4">📊 Your Personalized Learning Roadmap</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="text-xs text-slate-500 uppercase mb-1">Total Topics</p>
+                    <p class="text-2xl font-black text-white">{{ learning_path.path_data|length }}</p>
+                </div>
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="text-xs text-slate-500 uppercase mb-1">Total Duration</p>
+                    <p class="text-2xl font-black text-emerald-400">{{ (learning_path.path_data|map(attribute='duration_hours')|sum or 0)|int }} hrs</p>
+                </div>
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="text-xs text-slate-500 uppercase mb-1">Education Level</p>
+                    <p class="text-lg font-black text-white capitalize">{{ profile.education_level }}</p>
+                </div>
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="text-xs text-slate-500 uppercase mb-1">Learning Style</p>
+                    <p class="text-lg font-black text-white capitalize">{{ profile.learning_style }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Path Topics -->
+        <div class="glass-panel p-8 rounded-2xl mb-8">
+            <h3 class="text-xl font-black text-white mb-6">📚 Core Learning Path ({{ learning_path.path_data|length }} Topics)</h3>
+            <div class="space-y-4">
+                {% for topic in learning_path.path_data %}
+                <div class="topic-card glass-panel p-6 rounded-lg difficulty-{{ topic.difficulty }}">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="text-lg font-black text-white">{{ topic.topic }}</h4>
+                            <p class="text-sm text-slate-400">{{ topic.description }}</p>
+                        </div>
+                        <span class="text-xs font-bold px-3 py-1 rounded bg-emerald-500/20 text-emerald-400 uppercase">{{ topic.difficulty }}</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <p class="text-slate-500">⏱️ Duration</p>
+                            <p class="font-bold text-white">{{ topic.duration_hours }} hours</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500">📖 Resource</p>
+                            <p class="font-bold text-white capitalize">{{ topic.resource_type }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Weekly Study Plan -->
+        {% if learning_path.weekly_plan %}
+        <div class="glass-panel p-8 rounded-2xl mb-8">
+            <h3 class="text-xl font-black text-white mb-6">📅 6-Week Study Plan</h3>
+            <div class="space-y-6">
+                {% for week in learning_path.weekly_plan[:6] %}
+                <div class="bg-slate-900/50 p-6 rounded-lg border-l-4 border-emerald-500">
+                    <h4 class="text-lg font-black text-emerald-400 mb-3">Week {{ week.week }}</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase mb-2">Topics</p>
+                            <ul class="text-sm space-y-1">
+                                {% for topic in week.topics %}
+                                <li class="text-slate-300">✓ {{ topic }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase mb-2">Practice</p>
+                            <ul class="text-sm space-y-1">
+                                {% for activity in week.activities %}
+                                <li class="text-slate-300">• {{ activity }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase mb-2">Checkpoint</p>
+                            <p class="text-sm text-emerald-400 font-bold">{{ week.checkpoint }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Progression Strategy -->
+        {% if learning_path.progression_strategy %}
+        <div class="glass-panel p-8 rounded-2xl mb-8">
+            <h3 class="text-xl font-black text-white mb-6">🎯 Progression Strategy</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="text-sm text-slate-500 uppercase mb-2">📈 Advancement Criteria</p>
+                    <p class="text-slate-300">{{ learning_path.progression_strategy.advancement_criteria }}</p>
+                </div>
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="text-sm text-slate-500 uppercase mb-2">🔄 Revision Schedule</p>
+                    <p class="text-slate-300">{{ learning_path.progression_strategy.revision_schedule }}</p>
+                </div>
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="text-sm text-slate-500 uppercase mb-2">📝 Mock Tests</p>
+                    <p class="text-slate-300">{{ learning_path.progression_strategy.mock_test_schedule }}</p>
+                </div>
+                {% if learning_path.progression_strategy.remedial_topics %}
+                <div class="bg-red-500/10 p-4 rounded-lg border border-red-500/20">
+                    <p class="text-sm text-slate-500 uppercase mb-2">⚠️ Focus Areas</p>
+                    <ul class="text-sm text-slate-300 space-y-1">
+                        {% for topic in learning_path.progression_strategy.remedial_topics %}
+                        <li>• {{ topic }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Motivation & Tips -->
+        {% if learning_path.motivation_tips %}
+        <div class="glass-panel p-8 rounded-2xl">
+            <h3 class="text-xl font-black text-white mb-6">💪 Your Success Plan</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="text-emerald-400 font-bold mb-4">Personalized Tips</h4>
+                    <ul class="space-y-2">
+                        {% for tip in learning_path.motivation_tips.personalized_tips %}
+                        <li class="flex gap-2 text-sm text-slate-300">
+                            <span class="text-emerald-400">✓</span>
+                            <span>{{ tip }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-emerald-400 font-bold mb-4">Focus Areas</h4>
+                    <ul class="space-y-2">
+                        {% for area in learning_path.motivation_tips.focus_areas %}
+                        <li class="flex gap-2 text-sm text-slate-300">
+                            <span class="text-blue-400">→</span>
+                            <span>{{ area }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-6 p-4 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                <p class="text-sm text-emerald-300 font-bold">🎓 Predicted Timeline</p>
+                <p class="text-sm text-slate-300 mt-2">{{ learning_path.motivation_tips.predicted_timeline }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <button onclick="regeneratePath()" class="mt-8 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-lg transition">
+            Regenerate Path
+        </button>
+
+        {% endif %}
+    </main>
+
+    <!-- Profile Setup Modal -->
+    <div id="profileModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+        <div class="glass-panel rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-black text-white mb-6">Setup Your Learning Profile</h2>
+            <form id="profileForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-white mb-2">Education Level</label>
+                        <select name="education_level" id="education_level" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white">
+                            <option value="school">High School</option>
+                            <option value="undergraduate" selected>Undergraduate</option>
+                            <option value="postgraduate">Postgraduate</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-white mb-2">Knowledge Level</label>
+                        <select name="knowledge_level" id="knowledge_level" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white">
+                            <option value="beginner" selected>Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-white mb-2">Learning Style</label>
+                        <select name="learning_style" id="learning_style" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white">
+                            <option value="visual">Visual (Videos, Diagrams)</option>
+                            <option value="text">Text-based (Articles, Notes)</option>
+                            <option value="interactive" selected>Interactive (Simulations, Labs)</option>
+                            <option value="mixed">Mixed (All formats)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-white mb-2">Study Hours/Week</label>
+                        <input type="number" name="study_hours_per_week" id="study_hours_per_week" value="10" min="1" max="50" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-white mb-2">Target Duration (weeks)</label>
+                        <input type="number" name="target_duration_weeks" id="target_duration_weeks" value="12" min="4" max="52" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-white mb-2">Learning Goal</label>
+                        <select name="learning_goal" id="learning_goal" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white">
+                            <option value="exam preparation">Exam Preparation</option>
+                            <option value="research">Research</option>
+                            <option value="lab skills">Lab Skills</option>
+                            <option value="competitive exams">Competitive Exams</option>
+                            <option value="general understanding" selected>General Understanding</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <button type="button" onclick="hideProfileForm()" class="flex-1 text-white border border-slate-700 px-6 py-3 rounded-lg font-bold transition hover:border-slate-500">Cancel</button>
+                    <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-lg font-bold transition">Generate Path</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showProfileForm() {
+            document.getElementById('profileModal').classList.remove('hidden');
+        }
+
+        function hideProfileForm() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                education_level: formData.get('education_level'),
+                knowledge_level: formData.get('knowledge_level'),
+                learning_style: formData.get('learning_style'),
+                study_hours_per_week: parseInt(formData.get('study_hours_per_week')),
+                target_duration_weeks: parseInt(formData.get('target_duration_weeks')),
+                learning_goal: formData.get('learning_goal')
+            };
+
+            try {
+                const res = await fetch('/api/learner-profile', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    const genRes = await fetch('/api/generate-learning-path', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+
+                    if (genRes.ok) {
+                        location.reload();
+                    }
+                }
+            } catch (error) {
+                alert('Error generating path: ' + error.message);
+            }
+        });
+
+        function regeneratePath() {
+            if (confirm('Regenerate your learning path? Your current path will be replaced.')) {
+                showProfileForm();
+            }
+        }
+    </script>
+</body>
+</html>

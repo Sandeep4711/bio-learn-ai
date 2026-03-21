@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Synthesis | BioLearn AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            background-color: #020617;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+            font-family: 'Space Grotesk', sans-serif;
+            color: #e2e8f0;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .prose h1, .prose h2, .prose h3 {
+            color: #10b981 !important;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            margin-top: 2em !important;
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+            padding-bottom: 0.5rem;
+        }
+
+        .prose p {
+            color: #94a3b8;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .prose strong { color: #f8fafc; }
+
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(16, 185, 129, 0.1);
+            position: absolute;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <nav class="p-6">
+        <div class="container mx-auto flex justify-between items-center glass-card px-8 py-4 rounded-2xl border-b-2 border-emerald-500/50">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl animate-pulse">🧬</span>
+                <h1 class="text-xl font-black tracking-tighter uppercase text-emerald-400">MODULE_VIEWER</h1>
+            </div>
+            <div class="flex gap-4">
+                <a href="/terminal" class="text-xs font-mono text-slate-400 hover:text-emerald-400 transition">[ RETURN_TO_BIO_COMMAND ]</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-8 px-4 pb-24 relative">
+        <div class="max-w-5xl mx-auto glass-card rounded-3xl overflow-hidden relative">
+            <div class="scanline"></div>
+
+            <div class="bg-emerald-500/10 px-8 py-3 flex justify-between items-center border-b border-emerald-500/20">
+                <div class="flex items-center gap-4">
+                    <div class="flex gap-1">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    </div>
+                    <span class="text-[10px] font-mono text-emerald-500 tracking-widest uppercase">Encryption: AES-256-BIO</span>
+                </div>
+                <span id="date-stamp" class="text-[10px] font-mono text-slate-500"></span>
+            </div>
+
+            <div class="p-12">
+                <div class="mb-12 border-l-4 border-emerald-500 pl-8">
+                    <p class="text-emerald-500 font-mono text-xs mb-2 uppercase tracking-[0.3em]">Module_Subject</p>
+                    <h2 id="topicTitle" class="text-5xl font-black text-white capitalize tracking-tighter"></h2>
+                </div>
+                
+                <div id="contentArea" class="prose prose-invert max-w-none">
+                    </div>
+
+                <div class="mt-20 pt-10 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="text-slate-500 font-mono text-xs">
+                        <p>> SENSING COMPREHENSION LEVEL...</p>
+                        <p>> PREPARING ASSESSMENT_DATA_PACK</p>
+                    </div>
+                    <button onclick="window.location.href='/quiz'" 
+                            class="group relative px-12 py-5 bg-emerald-600 text-slate-900 font-black rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                        <span class="relative z-10 flex items-center gap-2 tracking-tighter">
+                            INITIATE_QUIZ_ENGINE <span class="text-xl">→</span>
+                        </span>
+                        <div class="absolute inset-0 bg-white transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 opacity-20"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Set Date Stamp
+        document.getElementById('date-stamp').innerText = "TIMESTAMP: " + new Date().toISOString().split('T')[0];
+
+        // Retrieve and Render Content
+        const content = localStorage.getItem('currentModule');
+        const topic = localStorage.getItem('currentTopic');
+
+        if (content) {
+            document.getElementById('topicTitle').innerText = topic;
+            
+            // Configure Marked for sleek output
+            marked.setOptions({
+                breaks: true,
+                gfm: true
+            });
+            
+            document.getElementById('contentArea').innerHTML = marked.parse(content);
+        } else {
+            document.getElementById('contentArea').innerHTML = `
+                <div class="text-center py-20 border-2 border-dashed border-slate-800 rounded-3xl">
+                    <p class="text-red-400 font-mono text-sm">CRITICAL_ERROR: DATA_PACK_NOT_FOUND</p>
+                    <a href="/terminal" class="text-emerald-500 underline text-xs mt-4 block">Return to Bio Command</a>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
