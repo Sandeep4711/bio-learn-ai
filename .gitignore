@@ -24,3 +24,11 @@ env/
 .DS_Store
 Thumbs.db
 .vscode/
+
+
+__pycache__/
+*.db
+*.log
+.env
+.env.*
+!.env.example
