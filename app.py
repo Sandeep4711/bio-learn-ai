@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import select
+from sqlalchemy.exc import OperationalError
 from dotenv import load_dotenv
 from authlib.integrations.flask_client import OAuth
 import os, cohere, json, datetime
@@ -125,7 +126,12 @@ class LessonHistory(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))
+    try:
+        return db.session.get(User, int(user_id))
+    except OperationalError:
+        # Gracefully handle temporary DB outages by treating user as logged out.
+        db.session.rollback()
+        return None
 
 # --- PRESENTATION & AUTH ROUTES ---
 
@@ -162,12 +168,29 @@ def login():
         stmt = select(User).filter_by(username=username)
         user = db.session.execute(stmt).scalar_one_or_none()
         
-        if user and check_password_hash(user.password, password):
+        if user and user.password and check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for('terminal'))
+
+        if user and not user.password:
+            flash('This account uses Google Sign-In. Please continue with Google login.')
+            return redirect(url_for('login'))
         
         flash('Access Denied: Invalid Researcher Credentials')
     return render_template('login.html')
+
+
+@app.errorhandler(OperationalError)
+def handle_operational_error(error):
+    """Return a user-friendly response when the database is temporarily unavailable."""
+    db.session.rollback()
+    app.logger.error(f"Database operational error: {error}")
+
+    if request.path.startswith('/api/'):
+        return jsonify({"error": "Database is temporarily unavailable. Please try again."}), 503
+
+    flash('Service is temporarily unavailable. Please retry in a moment.')
+    return redirect(url_for('login'))
 
 @app.route('/logout')
 def logout():
