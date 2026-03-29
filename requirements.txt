@@ -4,3 +4,4 @@ flask-login
 cohere
 python-dotenv
 werkzeug
+authlib
