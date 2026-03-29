@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import select
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, DataError
 from dotenv import load_dotenv
 from authlib.integrations.flask_client import OAuth
 import os, cohere, json, datetime
@@ -42,7 +42,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     email = db.Column(db.String(200), unique=True, nullable=True)
-    password = db.Column(db.String(150), nullable=True)  # Nullable for OAuth users
+    password = db.Column(db.String(255), nullable=True)  # Nullable for OAuth users
     google_id = db.Column(db.String(200), unique=True, nullable=True)
     profile_picture = db.Column(db.String(500), nullable=True)
 
@@ -155,7 +155,12 @@ def signup():
         # Create new researcher profile
         new_user = User(username=username, password=generate_password_hash(password))
         db.session.add(new_user)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except DataError:
+            db.session.rollback()
+            flash('Unable to create account due to a database schema mismatch. Please contact support.')
+            return redirect(url_for('signup'))
         return redirect(url_for('login'))
     return render_template('signup.html')
 
@@ -165,8 +170,13 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        stmt = select(User).filter_by(username=username)
-        user = db.session.execute(stmt).scalar_one_or_none()
+        try:
+            stmt = select(User).filter_by(username=username)
+            user = db.session.execute(stmt).scalar_one_or_none()
+        except DataError:
+            db.session.rollback()
+            flash('Login is temporarily unavailable due to a database schema mismatch.')
+            return redirect(url_for('login'))
         
         if user and user.password and check_password_hash(user.password, password):
             login_user(user)
