@@ -5,3 +5,4 @@ cohere
 python-dotenv
 werkzeug
 authlib
+psycopg2-binary
