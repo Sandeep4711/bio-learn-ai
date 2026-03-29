@@ -14,7 +14,11 @@ app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY') or os.urandom(32)
 
 # Database Configuration (Root Directory)
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+
+if os.getenv("VERCEL"):
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -1342,7 +1346,8 @@ def get_profile():
 
 if __name__ == '__main__':
     with app.app_context():
-        # Creates database.db in the root folder automatically
-        db.create_all()
-    # Runs on default port 5000
+        try:
+            db.create_all()
+        except:
+            pass
     app.run(debug=os.getenv('FLASK_DEBUG', 'false').lower() == 'true')
